@@ -1,0 +1,684 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gms_flutter/BLoC/States.dart';
+import 'package:gms_flutter/Models/AboutUsModel.dart';
+import 'package:gms_flutter/Models/ArticlesModel.dart';
+import 'package:gms_flutter/Models/DietPlanModel.dart';
+import 'package:gms_flutter/Models/FAQModel.dart';
+import 'package:gms_flutter/Models/SubscriptionsHistoryModel.dart';
+import 'package:gms_flutter/Models/WorkoutModel.dart';
+import 'package:gms_flutter/Models/HealthInfoModel.dart';
+import 'package:gms_flutter/Models/LoginModel.dart';
+import 'package:gms_flutter/Models/NotificationsModel.dart';
+import 'package:gms_flutter/Models/PrivateCoachModel.dart';
+import 'package:gms_flutter/Models/ProfileModel.dart';
+import 'package:gms_flutter/Models/ClassesModel.dart';
+import 'package:gms_flutter/Models/ProgramModel.dart';
+import 'package:gms_flutter/Models/SessionsModel.dart';
+import 'package:gms_flutter/Models/WorkoutProgressModel.dart';
+import 'package:gms_flutter/Remote/Dio_Linker.dart';
+import 'package:gms_flutter/Remote/End_Points.dart';
+import 'package:gms_flutter/Shared/SecureStorage.dart';
+import 'package:gms_flutter/Shared/SharedPrefHelper.dart';
+import 'package:gms_flutter/main.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../Modules/Base.dart';
+import '../Modules/Login.dart';
+
+class Manager extends Cubit<BLoCStates> {
+  Manager() : super(InitialState());
+
+  static Manager get(BuildContext context) => BlocProvider.of(context);
+
+  bool eyeVisible = true;
+
+  IconData eyeIcon = Icons.visibility;
+
+  void togglePasswordVisibility() {
+    eyeVisible = !eyeVisible;
+    eyeIcon = eyeVisible ? Icons.visibility : Icons.visibility_off;
+    emit(UpdateNewState());
+  }
+
+  void updateState() {
+    emit(UpdateNewState());
+  }
+
+  late Login_Model loginModel;
+
+  void login(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: LOGIN, data: data)
+        .then((value) async {
+          loginModel = Login_Model.fromJson(value.data);
+          SharedPrefHelper.saveUserData(ProfileModel.fromJson(value.data).data);
+          await TokenStorage.writeAccessToken(loginModel.accessToken);
+          await TokenStorage.writeRefreshToken(loginModel.refreshToken);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void logout() async {
+    final accessToken = await TokenStorage.readRefreshToken();
+    if (accessToken != null) {
+      emit(LoadingState());
+      await Dio_Linker.postData(url: LOGOUT)
+          .then((value) async {
+            await SharedPrefHelper.clear();
+            await TokenStorage.deleteAccessToken();
+            await TokenStorage.deleteRefreshToken();
+            emit(SuccessState());
+            MyApp.navigatorKey.currentState?.pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => Login()),
+              (_) => false,
+            );
+          })
+          .catchError((error) {
+            String errorMessage = handleDioError(error);
+            emit(ErrorState(errorMessage));
+          });
+    }
+  }
+
+  String? message;
+
+  void forgotPassword(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: FORGOTPASSWORD, data: data)
+        .then((value) {
+          message = value.data['message'];
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void verifyCode(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: VERIFYCODE, data: data)
+        .then((value) {
+          message = value.data['message'];
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void resetForgotPassword(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.putData(url: RESETFORGOTPASSWORD, data: data)
+        .then((value) {
+          message = value.data['message'];
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  String handleDioError(dynamic error) {
+    if (error is DioException) {
+      if (error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.sendTimeout) {
+        return 'Request Timeout, try again';
+      }
+      if (error.response?.data?['message'] != null) {
+        return error.response!.data['message'].toString();
+      }
+      if (error.type == DioExceptionType.connectionError) {
+        return 'No internet connection or server unreachable.';
+      }
+    }
+    return 'Unexpected error, try again later';
+  }
+
+  List<ClassesModel> userClassesModel = [];
+
+  void userClasses() {
+    emit(LoadingState());
+    Dio_Linker.getData(url: USERCLASSES)
+        .then((value) {
+          userClassesModel = ClassesModel.parseClassesList(value.data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<SessionsModel> userSessionsModel = [];
+
+  void userSessions() {
+    emit(LoadingState());
+    Dio_Linker.getData(url: USERSESSIONS)
+        .then((value) {
+          userSessionsModel = SessionsModel.parseSessionsList(value.data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<DietPlanModel> userDiets = [];
+
+  void userDietPlans() {
+    emit(LoadingState());
+    Dio_Linker.getData(url: USERDIETPLANS)
+        .then((value) {
+          userDiets = DietPlanModel.parseList(value.data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<PrivateCoachModel> userPrivateCoaches = [];
+
+  void userCoaches() {
+    emit(LoadingState());
+    Dio_Linker.getData(
+          url: USERPRIVATECOACHES + SharedPrefHelper.getString('id').toString(),
+        )
+        .then((value) {
+          userPrivateCoaches = PrivateCoachModel.parseList(value.data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<HealthInfoModel> userHealthInfos = [];
+
+  void userHealthInfo({startDate, endDate}) {
+    emit(LoadingState());
+    Dio_Linker.getData(
+          url: USERHEALTHINFO,
+          data: {
+            'userId': SharedPrefHelper.getString('id'),
+            'startDate': startDate,
+            'endDate': endDate,
+          },
+        )
+        .then((value) {
+          userHealthInfos = HealthInfoModel.parseList(value.data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  Future<void> logHealthInfo(Map<String, dynamic> data) {
+    emit(LoadingState());
+    return Dio_Linker.postData(url: LOGHEALTHINFO, data: data)
+        .then((value) {
+          userHealthInfo();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<WorkoutModel> userFavorites = [];
+
+  void getUserFavorites() {
+    emit(LoadingState());
+    Dio_Linker.getData(url: GETUSERFAVORITES)
+        .then((value) {
+          userFavorites = WorkoutModel.fromJsonList(value.data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void getUserProfile() {
+    emit(LoadingState());
+    Dio_Linker.getData(url: USERPROFILE)
+        .then((value) {
+          SharedPrefHelper.saveUserData(ProfileModel.fromJson(value.data).data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<NotificationModel> userNotifications = [];
+
+  void getNotifications() {
+    emit(LoadingState());
+    Dio_Linker.getData(url: USERNOTIFICATION)
+        .then((value) {
+          userNotifications = NotificationModel.fromJsonList(value.data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          print(error);
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  bool darkMode = false;
+
+  void changeAppTheme() {
+    darkMode = !darkMode;
+    SharedPrefHelper.saveBool('appTheme', darkMode);
+    emit(UpdateNewState());
+  }
+
+  bool appNotifications = true;
+
+  void changeAppNotification() {
+    appNotifications = !appNotifications;
+    SharedPrefHelper.saveBool('appNotifications', appNotifications);
+    emit(UpdateNewState());
+  }
+
+  void changePassword(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.putData(url: CHANGEPASSWORD, data: data)
+        .then((value) {
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  ArticlesModel? articles;
+
+  void getArticles({required Map<String, dynamic> data}) {
+    emit(LoadingState());
+    Dio_Linker.getData(url: GETARTICLES, params: data)
+        .then((value) {
+          articles = ArticlesModel.fromJson(value.data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  double readProgress = 0;
+
+  void UpdateProgressEvent(double newProgress) {
+    readProgress = newProgress;
+    updateState();
+  }
+
+  void updateProfile(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.putData(
+          url: UPDATEPROFILE + SharedPrefHelper.getString('id').toString(),
+          data: data,
+        )
+        .then((value) {
+          SharedPrefHelper.saveUserData(ProfileModel.fromJson(value.data).data);
+          MyApp.navigatorKey.currentState?.pushReplacement(
+            MaterialPageRoute(builder: (_) => Base()),
+          );
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  Future<void> updateProfileImage(XFile image) async {
+    emit(LoadingState());
+    Dio_Linker.putData(
+          url: UPLOADPROFILEIMAGE,
+          data: FormData.fromMap({
+            'id': SharedPrefHelper.getString('id').toString(),
+            'image': await MultipartFile.fromFile(
+              image.path,
+              filename: image.name,
+            ),
+          }),
+        )
+        .then((value) {
+          SharedPrefHelper.saveString(
+            'key',
+            value.data['message']['profileImagePath'],
+          );
+          MyApp.navigatorKey.currentState?.pushReplacement(
+            MaterialPageRoute(builder: (_) => Base()),
+          );
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void addClassFeedback(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: ADDCLASSFEEDBACK, data: data)
+        .then((value) {
+          userClasses();
+          MyApp.navigatorKey.currentState?.pop();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void deleteClassFeedback(String classId) {
+    emit(LoadingState());
+    Dio_Linker.deleteData(
+          url: DELETECLASSFEEDBACK,
+          data: {
+            'userId': SharedPrefHelper.getString('id'),
+            'classId': classId,
+          },
+        )
+        .then((value) {
+          userClasses();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void addSessionFeedback(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: ADDSESSIONFEEDBACK, data: data)
+        .then((value) {
+          userSessions();
+          MyApp.navigatorKey.currentState?.pop();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void deleteSessionFeedback(String sessionId) {
+    emit(LoadingState());
+    Dio_Linker.deleteData(
+          url: DELETESESSIONFEEDBACK,
+          data: {
+            'userId': SharedPrefHelper.getString('id'),
+            'sessionId': sessionId,
+          },
+        )
+        .then((value) {
+          userSessions();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void updateSessionRate(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: UPDATESESSIONRATE, data: data)
+        .then((value) {
+          userSessions();
+          MyApp.navigatorKey.currentState?.pop();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void deleteDietFeedback(String dietId) {
+    emit(LoadingState());
+    Dio_Linker.deleteData(
+          url: DELETEDIETFEEDBACK,
+          data: {'userId': SharedPrefHelper.getString('id'), 'dietId': dietId},
+        )
+        .then((value) {
+          userDietPlans();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void addDietFeedback(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: ADDDIETFEEDBACK, data: data)
+        .then((value) {
+          userDietPlans();
+          MyApp.navigatorKey.currentState?.pop();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void updateDietRate(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: UPDATEDIETRATE, data: data)
+        .then((value) {
+          userDietPlans();
+          MyApp.navigatorKey.currentState?.pop();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<ProgramModel> classPrograms = [];
+
+  void getClassPrograms(classId) {
+    emit(LoadingState());
+    Dio_Linker.getData(url: GETCLASSPROGRAMS + classId)
+        .then((value) {
+          classPrograms = ProgramModel.paresList(value.data['message']);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void updatePrivateCoachRate(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: UPDATECOACHRATE, data: data)
+        .then((value) {
+          userCoaches();
+          MyApp.navigatorKey.currentState?.pop();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void deleteHealthRecord(recordId, {startDate, endDate}) {
+    emit(LoadingState());
+    Dio_Linker.deleteData(url: DELETEHEALTHRECORD + recordId)
+        .then((value) {
+          userHealthInfo(startDate: startDate, endDate: endDate);
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void deleteFavoriteRecord(String workoutId) {
+    emit(LoadingState());
+    Dio_Linker.deleteData(url: DELETEFROMFAVORITE + workoutId)
+        .then((value) {
+          getUserFavorites();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void addToFavorite(String workoutId) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: ADDTOFAVORITE + workoutId)
+        .then((value) {
+          getUserFavorites();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<SubscriptionsHistoryModel> userSubscriptionsHistory = [];
+
+  void getUserSubscriptionsHistory() {
+    emit(LoadingState());
+    Dio_Linker.getData(
+          url:
+              GETSUBSCRIPTIONSHISTORY +
+              SharedPrefHelper.getString('id').toString(),
+        )
+        .then((value) {
+          userSubscriptionsHistory = SubscriptionsHistoryModel.parseList(
+            value.data['message'],
+          );
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<FAQModel> faqList = [];
+
+  void getFAQs() {
+    emit(LoadingState());
+    Dio_Linker.getData(url: GETFAQS)
+        .then((value) {
+          faqList = FAQModel.parseList(value.data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  AboutUsModel? aboutUsModel;
+
+  void getAboutUs() {
+    emit(LoadingState());
+    Dio_Linker.getData(url: GETABOUTUS)
+        .then((value) {
+          aboutUsModel = AboutUsModel.fromJson(value.data['message']);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void deleteNotification(String notificationId) {
+    emit(LoadingState());
+    Dio_Linker.deleteData(url: DELETENOTIFICATION + notificationId)
+        .then((value) {
+          getNotifications();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  Future<void> logWorkoutProgress(Map<String, dynamic> data) {
+    emit(LoadingState());
+    return Dio_Linker.postData(url: LOGWORKOUTPROGRESS, data: data)
+        .then((value) {
+          getWorkoutProgress(data['program_workout_id']);
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<WorkoutProgressModel> workoutProgresses = [];
+
+  void getWorkoutProgress(program_workout_id, {startDate, endDate}) {
+    emit(LoadingState());
+    Dio_Linker.getData(
+          url: GETWORKOUTPROGRESS,
+          data: {
+            'userId': SharedPrefHelper.getString('id'),
+            'program_workout_id': program_workout_id,
+            'startDate': startDate,
+            'endDate': endDate,
+          },
+        )
+        .then((value) {
+          workoutProgresses = WorkoutProgressModel.parseList(value.data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void deleteWorkoutProgress(
+    String recordId,
+    program_workout_id, {
+    startDate,
+    endDate,
+  }) {
+    emit(LoadingState());
+    Dio_Linker.deleteData(url: DELETEWORKOUTPROGRESS + recordId)
+        .then((value) {
+          getWorkoutProgress(
+            program_workout_id,
+            startDate: startDate,
+            endDate: endDate,
+          );
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+}
