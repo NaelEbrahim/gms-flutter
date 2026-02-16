@@ -23,14 +23,7 @@ class WorkoutProgressModel {
     );
   }
 
-  static List<WorkoutProgressModel> parseList(jsonList) {
-    List<WorkoutProgressModel> result = [];
-    if (jsonList != null && (jsonList as List).isNotEmpty) {
-      for (var element in jsonList) {
-        result.add(WorkoutProgressModel.fromJson(element));
-      }
-      return result;
-    }
-    return result;
+  static List<WorkoutProgressModel> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => WorkoutProgressModel.fromJson(e)).toList();
   }
 }

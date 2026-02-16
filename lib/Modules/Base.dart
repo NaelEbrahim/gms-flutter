@@ -1,9 +1,9 @@
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gms_flutter/BLoC/States.dart';
 import 'package:gms_flutter/Modules/Home/Dashboard.dart';
 import 'package:gms_flutter/Modules/Home/Home.dart';
-import 'package:gms_flutter/Modules/Home/Profile.dart';
 import 'package:gms_flutter/Modules/Home/ShowQR.dart';
 import 'package:gms_flutter/Modules/drawer/About.dart';
 import 'package:gms_flutter/Modules/drawer/Faq.dart';
@@ -16,26 +16,34 @@ import '../BLoC/Manager.dart';
 import 'Chatting/ChatList.dart';
 import 'Notifications.dart';
 
-typedef DrawerItemCallback = void Function(String routeName);
+class Base extends StatefulWidget {
+  const Base({super.key});
 
-class Base extends StatelessWidget {
-  Base({super.key});
+  @override
+  State<Base> createState() => _BaseState();
+}
 
+class _BaseState extends State<Base> {
   int bottomNavIndex = 0;
 
-  List<Widget> screens = [Home(), Dashboard(), ShowQR(), Profile()];
+  List<Widget> screens = [Home(), Dashboard(), ShowQR(), Settings()];
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
+  void initState() {
+    super.initState();
+    Manager.get(context).getUserProfile();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var manager = Manager.get(context);
-    manager.getUserProfile();
     return BlocConsumer<Manager, BLoCStates>(
-      listener: (context, state) {},
+      listener: (context, st5ate) {},
       builder: (context, state) {
         return Scaffold(
           key: _scaffoldKey,
+          backgroundColor: Constant.scaffoldColor,
           drawer: buildDrawer(context),
           appBar: AppBar(
             leading: IconButton(
@@ -65,16 +73,17 @@ class Base extends StatelessWidget {
             ),
           ),
           body: SafeArea(
-            child: Container(
-              height: Constant.screenHeight,
-              width: Constant.screenWidth,
-              padding: const EdgeInsets.only(
-                top: 5.0,
-                left: 10.0,
-                right: 10.0,
+            child: ConditionalBuilder(
+              condition: state is! LoadingState,
+              builder: (context) => Container(
+                height: Constant.screenHeight,
+                width: Constant.screenWidth,
+                padding: const EdgeInsets.all(10),
+                color: Constant.scaffoldColor,
+                child: Center(child: screens[bottomNavIndex]),
               ),
-              color: Colors.black87,
-              child: screens[bottomNavIndex],
+              fallback: (context) =>
+                  Center(child: const CircularProgressIndicator()),
             ),
           ),
           bottomNavigationBar: Theme(
@@ -82,8 +91,9 @@ class Base extends StatelessWidget {
             child: BottomNavigationBar(
               currentIndex: bottomNavIndex,
               onTap: (int index) {
-                bottomNavIndex = index;
-                manager.updateState();
+                setState(() {
+                  bottomNavIndex = index;
+                });
               },
               selectedItemColor: Colors.greenAccent,
               items: const <BottomNavigationBarItem>[
@@ -100,8 +110,8 @@ class Base extends StatelessWidget {
                   label: 'QR',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.person_outline),
-                  label: 'Profile',
+                  icon: Icon(Icons.settings),
+                  label: 'Settings',
                 ),
               ],
             ),
@@ -113,12 +123,13 @@ class Base extends StatelessWidget {
 
   Widget buildDrawer(BuildContext context) {
     return Drawer(
+      backgroundColor: Constant.scaffoldColor,
       child: SafeArea(
         child: Column(
           children: [
             Container(
               width: double.infinity,
-              height: MediaQuery.of(context).size.height * 0.23,
+              height: Constant.screenHeight * 0.23,
               padding: const EdgeInsets.symmetric(
                 horizontal: 20.0,
                 vertical: 18.0,
@@ -173,52 +184,43 @@ class Base extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: Container(
-                color: Colors.black87,
-                child: Column(
-                  children: [
-                    const SizedBox(height: 8),
-                    _tile(
-                      context,
-                      Icons.chat_bubble_outline,
-                      "Chats",
-                      ChatList(),
-                    ),
-                    _tile(
-                      context,
-                      Icons.history,
-                      "Subscription History",
-                      SubscriptionHistory(),
-                    ),
-                    _tile(
-                      context,
-                      Icons.menu_book_outlined,
-                      "Knowledge Hub",
-                      KnowledgeHubHome(),
-                    ),
-                    _tile(
-                      context,
-                      Icons.settings_outlined,
-                      "Settings",
-                      Settings(),
-                    ),
-                    const Divider(),
-                    _tile(
-                      context,
-                      Icons.info_outline,
-                      "About Us",
-                      About(),
-                      trailingArrow: false,
-                    ),
-                    _tile(
-                      context,
-                      Icons.help_outline,
-                      "FAQ",
-                      FAQ(),
-                      trailingArrow: false,
-                    ),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 8),
+                  _tile(
+                    context,
+                    Icons.chat_bubble_outline,
+                    "Chats",
+                    ChatList(),
+                  ),
+                  _tile(
+                    context,
+                    Icons.history,
+                    "Subscription History",
+                    SubscriptionHistory(),
+                  ),
+                  _tile(
+                    context,
+                    Icons.menu_book_outlined,
+                    "Knowledge Hub",
+                    KnowledgeHubHome(),
+                  ),
+                  const Divider(),
+                  _tile(
+                    context,
+                    Icons.info_outline,
+                    "About Us",
+                    About(),
+                    trailingArrow: false,
+                  ),
+                  _tile(
+                    context,
+                    Icons.help_outline,
+                    "FAQ",
+                    FAQ(),
+                    trailingArrow: false,
+                  ),
+                ],
               ),
             ),
           ],

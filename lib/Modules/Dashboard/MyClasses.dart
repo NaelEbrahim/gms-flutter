@@ -9,297 +9,299 @@ import 'package:gms_flutter/Shared/Constant.dart';
 
 import '../../BLoC/Manager.dart';
 
-class MyClasses extends StatelessWidget {
-  Manager? _manager;
+class MyClasses extends StatefulWidget {
+  const MyClasses({super.key});
+
+  @override
+  State<MyClasses> createState() => _MyClassesState();
+}
+
+class _MyClassesState extends State<MyClasses> {
+  late Manager manager;
+
+  @override
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
+    manager.getUserClasses();
+  }
+
+  @override
+  void dispose() {
+    manager.userClasses.clear();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => Manager()..userClasses(),
-      child: BlocConsumer<Manager, BLoCStates>(
-        listener: (context, state) {
-          if (state is ErrorState) {
-            ReusableComponents.showToast(
-              state.error.toString(),
-              background: Colors.red,
-            );
-          }
-        },
-        builder: (context, state) {
-          _manager = Manager.get(context);
-          return Scaffold(
-            backgroundColor: Constant.scaffoldColor,
-            appBar: AppBar(
-              iconTheme: IconThemeData(color: Colors.white),
-              title: reusableText(
-                content: 'My Classes',
-                fontSize: 22.0,
-                fontColor: Colors.greenAccent,
-                fontWeight: FontWeight.bold,
-              ),
-              backgroundColor: Colors.black,
-              centerTitle: true,
-              elevation: 0,
+    return BlocConsumer<Manager, BLoCStates>(
+      listener: (context, state) {
+        if (state is ErrorState) {
+          ReusableComponents.showToast(
+            state.error.toString(),
+            background: Colors.red,
+          );
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: Constant.scaffoldColor,
+          appBar: AppBar(
+            iconTheme: IconThemeData(color: Colors.white),
+            title: reusableText(
+              content: 'My Classes',
+              fontSize: 22.0,
+              fontColor: Colors.greenAccent,
+              fontWeight: FontWeight.bold,
             ),
-            body: ConditionalBuilder(
-              condition: state is! LoadingState,
-              builder: (context) {
-                if (state is SuccessState || state is UpdateNewState) {
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(10),
-                    itemCount: _manager?.userClassesModel.length,
-                    itemBuilder: (context, index) {
-                      ClassesModel? item = _manager?.userClassesModel.elementAt(
-                        index,
-                      );
-                      return _buildClassCard(context, item!, index);
-                    },
-                  );
-                } else {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        reusableText(
-                          content: 'Connection error!',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.0,
-                        ),
-                        const SizedBox(height: 10.0),
-                        GestureDetector(
-                          onTap: () {
-                            _manager?.userClasses();
-                          },
-                          child: Container(
-                            height: 50,
-                            width: Constant.screenWidth / 3,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.teal.shade700,
-                                  Constant.scaffoldColor,
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(15),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.green.shade700,
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
+            backgroundColor: Colors.black,
+            centerTitle: true,
+            elevation: 0,
+          ),
+          body: ConditionalBuilder(
+            condition: state is! LoadingState,
+            builder: (context) {
+              if (state is SuccessState || state is UpdateNewState) {
+                return ListView.builder(
+                  padding: const EdgeInsets.all(10),
+                  itemCount: manager.userClasses.length,
+                  itemBuilder: (context, index) {
+                    ClassesModel? item = manager.userClasses.elementAt(index);
+                    return _buildClassCard(context, item, index);
+                  },
+                );
+              } else {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      reusableText(
+                        content: 'Connection error!',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                      ),
+                      const SizedBox(height: 10.0),
+                      GestureDetector(
+                        onTap: () {
+                          manager.getUserClasses();
+                        },
+                        child: Container(
+                          height: 50,
+                          width: Constant.screenWidth / 3,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.teal.shade700,
+                                Constant.scaffoldColor,
                               ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            child: const Center(
-                              child: Text(
-                                "Retry",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.green.shade700,
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Text(
+                              "Retry",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                }
-              },
-              fallback: (context) =>
-                  Center(child: const CircularProgressIndicator()),
-            ),
-          );
-        },
-      ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+            fallback: (context) =>
+                Center(child: const CircularProgressIndicator()),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildClassCard(BuildContext context, ClassesModel item, int index) {
     return TweenAnimationBuilder<double>(
+      key: ValueKey(item.id),
       tween: Tween(begin: 0.85, end: 1),
       duration: Duration(milliseconds: 500 + (index * 150)),
       curve: Curves.easeOutBack,
       builder: (context, scale, child) {
         return Transform.scale(scale: scale, child: child);
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: [Colors.teal.shade700, Colors.black87],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      child: GestureDetector(
+        onTap: (){
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ClassInfo(
+                classId: item.id.toString(),
+                image: item.imagePath,
+                title: item.name.toString(),
+                description: item.description.toString(),
+                pricePerMonth: item.price.toString(),
+                coach: item.coach,
+              ),
+            ),
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.black87],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(102),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(102),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
-              ),
-              child: Image.asset(
-                'images/1.png', //TODO : use Server Image
-                height: 180,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        item.name.toString(),
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.greenAccent,
-                        ),
-                      ),
-                      Spacer(),
-                      Padding(
-                        padding: EdgeInsets.only(right: 8.0),
-                        child: IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ClassInfo(
-                                  classId: item.id.toString(),
-                                  image: 'images/1.png',
-                                  // TODO : use Server Image
-                                  title: item.name.toString(),
-                                  description: item.description.toString(),
-                                  pricePerMonth: item.price.toString(),
-                                  coach: item.coach,
-                                ),
-                              ),
-                            );
-                          },
-                          icon: Icon(
-                            Icons.info_outlined,
-                            color: Colors.greenAccent,
-                            size: 28.0,
-                          ),
-                        ),
-                      ),
-                    ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Icon(
-                        item.isActive ? Icons.check_circle : Icons.cancel,
-                        color: item.isActive
-                            ? Colors.greenAccent
-                            : Colors.redAccent,
+                  child: (item.imagePath != null) ? Image.network(
+                    Constant.mediaURL + item.imagePath.toString(),
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.fill,
+                    errorBuilder: (_, _, _) =>
+                    const Icon(Icons.broken_image, size: 100),
+                  ) : const Icon(Icons.image_not_supported_outlined,size: 100,),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name.toString(),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.greenAccent,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        item.isActive ? "Active" : "Inactive",
-                        style: TextStyle(
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Icon(
+                          item.isActive ? Icons.check_circle : Icons.cancel,
                           color: item.isActive
                               ? Colors.greenAccent
                               : Colors.redAccent,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
                         ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        "Joined: ${item.joinedAt?.substring(0, 10)}",
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.white70,
+                        const SizedBox(width: 8),
+                        Text(
+                          item.isActive ? "Active" : "Inactive",
+                          style: TextStyle(
+                            color: item.isActive
+                                ? Colors.greenAccent
+                                : Colors.redAccent,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  if (item.myFeedBack != null)
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white10,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              item.myFeedBack.toString(),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.white70,
-                                height: 1.4,
-                              ),
-                            ),
+                        const Spacer(),
+                        Text(
+                          "Joined: ${item.joinedAt?.substring(0, 10)}",
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.white70,
                           ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete,
-                              color: Colors.redAccent,
-                              size: 20,
-                            ),
-                            onPressed: () {
-                              ReusableComponents.deleteDialog<Manager>(
-                                context,
-                                () async {
-                                  _manager?.deleteClassFeedback(
-                                    item.id.toString(),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    )
-                  else
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.greenAccent,
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    if (item.myFeedBack != null)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white10,
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.myFeedBack.toString(),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white70,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Colors.redAccent,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                ReusableComponents.deleteDialog<Manager>(
+                                  context,
+                                  () async {
+                                    manager.deleteClassFeedback(
+                                      item.id.toString(),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.greenAccent,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: const Icon(Icons.edit),
+                        label: const Text("Submit Feedback"),
+                        onPressed: () {
+                          _showFeedbackDialog(context, item);
+                        },
                       ),
-                      icon: const Icon(Icons.edit),
-                      label: const Text("Submit Feedback"),
-                      onPressed: () {
-                        _showFeedbackDialog(context, item);
-                      },
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  void _showFeedbackDialog(
-    BuildContext context,
-    ClassesModel item,
-  ) {
+  void _showFeedbackDialog(BuildContext context, ClassesModel item) {
     final controller = TextEditingController();
     showDialog(
       context: context,
@@ -336,9 +338,9 @@ class MyClasses extends StatelessWidget {
             ),
             child: const Text("Submit"),
             onPressed: () async {
-              _manager?.addClassFeedback({
-                'classId' : item.id,
-                'feedback' : controller.text
+              manager.addClassFeedback({
+                'classId': item.id,
+                'feedback': controller.text,
               });
             },
           ),

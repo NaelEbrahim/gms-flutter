@@ -9,19 +9,40 @@ import '../../../BLoC/Manager.dart';
 import '../../../Models/WorkoutModel.dart';
 import '../../../Shared/Constant.dart';
 
-class WorkoutDetails extends StatelessWidget {
+class WorkoutDetails extends StatefulWidget {
   final WorkoutModel workout;
 
   const WorkoutDetails({super.key, required this.workout});
 
   @override
+  State<WorkoutDetails> createState() => _WorkoutDetailsState();
+}
+
+class _WorkoutDetailsState extends State<WorkoutDetails> {
+  late Manager manager;
+
+  @override
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
+    manager.getUserFavorites();
+  }
+
+  @override
+  void dispose() {
+    manager.userFavorites.clear();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var manager = Manager.get(context);
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {},
       builder: (context, state) {
         final isFavorite =
-            manager.userFavorites.indexWhere((item) => item.id == workout.id) !=
+            manager.userFavorites.indexWhere(
+              (item) => item.id == widget.workout.id,
+            ) !=
             -1;
         return Scaffold(
           backgroundColor: Constant.scaffoldColor,
@@ -31,7 +52,7 @@ class WorkoutDetails extends StatelessWidget {
             iconTheme: const IconThemeData(color: Colors.white),
             centerTitle: true,
             title: Text(
-              workout.title,
+              widget.workout.title,
               style: const TextStyle(
                 color: Colors.greenAccent,
                 fontSize: 22,
@@ -39,85 +60,92 @@ class WorkoutDetails extends StatelessWidget {
               ),
             ),
             actions: [
-              if (workout.programWorkoutId != null)
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WorkoutProgress(
-                        program_workout_id: workout.programWorkoutId ?? 0,
-                        workoutModel: workout,
-                      ),
-                    ),
-                  );
-                },
-                icon: Icon(Icons.bar_chart_outlined),
-                color: Colors.white,
-              ),
-              ConditionalBuilder(
-                condition: state is! LoadingState,
-                builder: (context) => IconButton(
-                  icon: Icon(
-                    (isFavorite) ? Icons.favorite : Icons.favorite_border,
-                    color: Colors.redAccent,
-                  ),
+              if (widget.workout.programWorkoutId != null)
+                IconButton(
                   onPressed: () {
-                    if (isFavorite) {
-                      manager.deleteFavoriteRecord(workout.id.toString());
-                    } else {
-                      manager.addToFavorite(workout.id.toString());
-                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WorkoutProgress(
+                          program_workout_id:
+                              widget.workout.programWorkoutId ?? 0,
+                          workoutModel: widget.workout,
+                        ),
+                      ),
+                    );
                   },
+                  icon: Icon(Icons.bar_chart_outlined),
+                  color: Colors.white,
                 ),
-                fallback: (context) => const CircularProgressIndicator(),
+              IconButton(
+                icon: Icon(
+                  (isFavorite) ? Icons.favorite : Icons.favorite_border,
+                  color: Colors.redAccent,
+                ),
+                onPressed: (state is! LoadingState)
+                    ? () {
+                        if (isFavorite) {
+                          manager.deleteFavoriteRecord(
+                            widget.workout.id.toString(),
+                          );
+                        } else {
+                          manager.addToFavorite(widget.workout.id.toString());
+                        }
+                      }
+                    : null,
               ),
             ],
           ),
-          body: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _buildWorkoutImage(),
-              const SizedBox(height: 16),
-              _detailCard(
-                icon: FontAwesomeIcons.dumbbell,
-                title: "Primary Muscle",
-                value: workout.primaryMuscle,
-              ),
-              _detailCard(
-                icon: FontAwesomeIcons.person,
-                title: "Secondary Muscles",
-                value: workout.secondaryMuscles ?? "-",
-              ),
-              if (workout.reps != null)
+          body: ConditionalBuilder(
+            condition: state is! LoadingState,
+            builder: (context) => ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                _buildWorkoutImage(),
+                const SizedBox(height: 16),
                 _detailCard(
-                  icon: FontAwesomeIcons.arrowsRotate,
-                  title: "Reps",
-                  value: workout.reps.toString(),
+                  icon: FontAwesomeIcons.dumbbell,
+                  title: "Primary Muscle",
+                  value: widget.workout.primaryMuscle,
                 ),
-              if (workout.sets > 0)
                 _detailCard(
-                  icon: FontAwesomeIcons.layerGroup,
-                  title: "Sets",
-                  value: workout.sets.toString(),
+                  icon: FontAwesomeIcons.person,
+                  title: "Secondary Muscles",
+                  value: widget.workout.secondaryMuscles ?? "-",
                 ),
-              if (workout.duration != null)
+                if (widget.workout.reps != null && widget.workout.reps! > 0)
+                  _detailCard(
+                    icon: FontAwesomeIcons.arrowsRotate,
+                    title: "Reps",
+                    value: widget.workout.reps.toString(),
+                  ),
+                if (widget.workout.sets > 0)
+                  _detailCard(
+                    icon: FontAwesomeIcons.layerGroup,
+                    title: "Sets",
+                    value: widget.workout.sets.toString(),
+                  ),
+                if (widget.workout.duration != null &&
+                    widget.workout.duration! > 1)
+                  _detailCard(
+                    icon: FontAwesomeIcons.stopwatch,
+                    title: "Duration (min)",
+                    value: widget.workout.duration.toString(),
+                  ),
                 _detailCard(
-                  icon: FontAwesomeIcons.stopwatch,
-                  title: "Duration (min)",
-                  value: workout.duration.toString(),
+                  icon: FontAwesomeIcons.fire,
+                  title: "Total Calories",
+                  value: widget.workout.totalBurnedCalories.toString(),
                 ),
-              _detailCard(
-                icon: FontAwesomeIcons.fire,
-                title: "Total Calories",
-                value: workout.totalBurnedCalories.toString(),
-              ),
-              _detailCard(
-                icon: FontAwesomeIcons.file,
-                title: "Description",
-                value: workout.description,
-              ),
-            ],
+                _detailCard(
+                  icon: FontAwesomeIcons.file,
+                  title: "Description",
+                  value: widget.workout.description,
+                ),
+              ],
+            ),
+            fallback: (context) =>
+                Center(child: const CircularProgressIndicator()),
           ),
         );
       },
@@ -125,7 +153,9 @@ class WorkoutDetails extends StatelessWidget {
   }
 
   Widget _buildWorkoutImage() {
-    final hasImage = workout.imagePath != null && workout.imagePath!.isNotEmpty;
+    final hasImage =
+        widget.workout.imagePath != null &&
+        widget.workout.imagePath!.isNotEmpty;
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: Container(
@@ -134,7 +164,7 @@ class WorkoutDetails extends StatelessWidget {
         color: Colors.black26,
         child: hasImage
             ? Image.network(
-                Constant.mediaURL + workout.imagePath!,
+                Constant.mediaURL + widget.workout.imagePath!,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) => const Center(
                   child: Icon(

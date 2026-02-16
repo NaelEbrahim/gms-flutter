@@ -32,15 +32,8 @@ class ClassesModel {
     this.feedbacks,
   });
 
-  static List<ClassesModel> parseClassesList(jsonList) {
-    List<ClassesModel> userClasses = [];
-    if (jsonList != null && (jsonList as List).isNotEmpty) {
-      for (var element in jsonList) {
-        userClasses.add(ClassesModel.fromJson(element));
-      }
-      return userClasses;
-    }
-    return [];
+  static List<ClassesModel> parseClassesList(List<dynamic> jsonList) {
+    return jsonList.map((e) => ClassesModel.fromJson(e)).toList();
   }
 
   factory ClassesModel.fromJson(Map<String, dynamic> json) {

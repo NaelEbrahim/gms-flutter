@@ -9,14 +9,21 @@ import '../../Shared/Components.dart';
 import '../../Shared/Constant.dart';
 
 
-final _resetFormKey = GlobalKey<FormState>();
-final _newPasswordController = TextEditingController();
-final _confirmPasswordController = TextEditingController();
-
-class ResetPassword extends StatelessWidget {
+class ResetPassword extends StatefulWidget {
   final String email;
 
   const ResetPassword(this.email, {super.key});
+
+  @override
+  State<ResetPassword> createState() => _ResetPasswordState();
+}
+
+class _ResetPasswordState extends State<ResetPassword> {
+  bool _isNewPasswordHide = true;
+  bool _isConfirmNewPasswordHide = true;
+  final _resetFormKey = GlobalKey<FormState>();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -94,10 +101,14 @@ class ResetPassword extends StatelessWidget {
                           Icons.lock_outline,
                           color: Colors.teal.shade700,
                         ),
-                        obscureText: manager.eyeVisible,
-                        suffixIcon: manager.eyeIcon,
+                        obscureText: _isNewPasswordHide,
+                        suffixIcon: _isNewPasswordHide
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         suffixIconFunction: () {
-                          manager.togglePasswordVisibility();
+                          setState(() {
+                            _isNewPasswordHide = !_isNewPasswordHide;
+                          });
                         },
                         radius: 12,
                         validator: (value) {
@@ -133,10 +144,14 @@ class ResetPassword extends StatelessWidget {
                           Icons.lock_reset,
                           color: Colors.teal.shade700,
                         ),
-                        obscureText: manager.eyeVisible,
-                        suffixIcon: manager.eyeIcon,
+                        obscureText: _isConfirmNewPasswordHide,
+                        suffixIcon: _isConfirmNewPasswordHide
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         suffixIconFunction: () {
-                          manager.togglePasswordVisibility();
+                          setState(() {
+                            _isConfirmNewPasswordHide = !_isConfirmNewPasswordHide;
+                          });
                         },
                         radius: 12,
                         validator: (value) {
@@ -159,7 +174,7 @@ class ResetPassword extends StatelessWidget {
                       onTap: () {
                         if (_resetFormKey.currentState!.validate()) {
                           manager.resetForgotPassword({
-                            'email': email,
+                            'email': widget.email,
                             'newPassword': _newPasswordController.text,
                           });
                         }

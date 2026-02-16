@@ -19,16 +19,6 @@ class ProgramModel {
     this.feedbacks,
   });
 
-  static List<ProgramModel> paresList(jsonList) {
-    List<ProgramModel> programs = [];
-    if (jsonList != null && (jsonList as List).isNotEmpty) {
-      for (var element in jsonList) {
-        programs.add(ProgramModel.fromJson(element));
-      }
-    }
-    return programs;
-  }
-
   factory ProgramModel.fromJson(Map<String, dynamic> json) {
     return ProgramModel(
       id: json['id'] as int?,
@@ -41,6 +31,10 @@ class ProgramModel {
           : null,
       feedbacks: json['feedbacks'] as List<dynamic>?,
     );
+  }
+
+  static List<ProgramModel> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => ProgramModel.fromJson(e)).toList();
   }
 }
 

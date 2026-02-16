@@ -3,35 +3,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gms_flutter/BLoC/Manager.dart';
 import 'package:gms_flutter/BLoC/States.dart';
-import 'package:gms_flutter/Modules/Login.dart';
 
 import '../../Shared/Components.dart';
 import '../../Shared/Constant.dart';
 
-final _resetFormKey = GlobalKey<FormState>();
-final _oldPasswordController = TextEditingController();
-final _newPasswordController = TextEditingController();
-final _confirmPasswordController = TextEditingController();
 
-class ChangePassword extends StatelessWidget {
+class ChangePassword extends StatefulWidget {
   const ChangePassword({super.key});
+
+  @override
+  State<ChangePassword> createState() => _ChangePasswordState();
+}
+
+class _ChangePasswordState extends State<ChangePassword> {
+  bool _isOldPasswordHide = true;
+  bool _isNewPasswordHide = true;
+  bool _isConfirmNewPasswordHide = true;
+  final _resetFormKey = GlobalKey<FormState>();
+  final _oldPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _oldPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {
-        // success
-        if (state is SuccessState) {
-          ReusableComponents.showToast(
-            Manager.get(context).message.toString(),
-            background: Colors.green,
-          );
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Login()),
-            (route) => false,
-          );
-        }
         // error
         if (state is ErrorState) {
           ReusableComponents.showToast(
@@ -45,7 +49,7 @@ class ChangePassword extends StatelessWidget {
         return Scaffold(
           backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
-            iconTheme: IconThemeData(color: Colors.white),
+            foregroundColor: Colors.white,
             title: reusableText(
               content: 'Update Password',
               fontSize: 22.0,
@@ -87,10 +91,14 @@ class ChangePassword extends StatelessWidget {
                           Icons.key,
                           color: Colors.teal.shade700,
                         ),
-                        obscureText: manager.eyeVisible,
-                        suffixIcon: manager.eyeIcon,
+                        obscureText: _isOldPasswordHide,
+                        suffixIcon: _isOldPasswordHide
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         suffixIconFunction: () {
-                          manager.togglePasswordVisibility();
+                          setState(() {
+                            _isOldPasswordHide = !_isOldPasswordHide;
+                          });
                         },
                         radius: 12,
                         validator: (value) {
@@ -126,10 +134,14 @@ class ChangePassword extends StatelessWidget {
                           Icons.lock_outline,
                           color: Colors.teal.shade700,
                         ),
-                        obscureText: manager.eyeVisible,
-                        suffixIcon: manager.eyeIcon,
+                        obscureText: _isNewPasswordHide,
+                        suffixIcon: _isNewPasswordHide
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         suffixIconFunction: () {
-                          manager.togglePasswordVisibility();
+                          setState(() {
+                            _isNewPasswordHide = !_isNewPasswordHide;
+                          });
                         },
                         radius: 12,
                         validator: (value) {
@@ -165,10 +177,15 @@ class ChangePassword extends StatelessWidget {
                           Icons.lock_reset,
                           color: Colors.teal.shade700,
                         ),
-                        obscureText: manager.eyeVisible,
-                        suffixIcon: manager.eyeIcon,
+                        obscureText: _isConfirmNewPasswordHide,
+                        suffixIcon: _isConfirmNewPasswordHide
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         suffixIconFunction: () {
-                          manager.togglePasswordVisibility();
+                          setState(() {
+                            _isConfirmNewPasswordHide =
+                                !_isConfirmNewPasswordHide;
+                          });
                         },
                         radius: 12,
                         validator: (value) {

@@ -10,34 +10,49 @@ import 'package:gms_flutter/Shared/Components.dart';
 import 'package:gms_flutter/Shared/Constant.dart';
 import 'package:intl/intl.dart';
 
-class WorkoutProgress extends StatelessWidget {
-  int program_workout_id;
-  WorkoutModel workoutModel;
+class WorkoutProgress extends StatefulWidget {
+  final int program_workout_id;
+  final WorkoutModel workoutModel;
 
-  WorkoutProgress({
+  const WorkoutProgress({
     super.key,
     required this.program_workout_id,
     required this.workoutModel,
   });
 
-  Manager? _manager;
+  @override
+  State<WorkoutProgress> createState() => _WorkoutProgressState();
+}
 
-  // Filters
+class _WorkoutProgressState extends State<WorkoutProgress> {
+  late Manager manager;
+  bool showCharts = true;
   String _startDate = '';
   String _endDate = '';
-  final TextEditingController _startDateController = TextEditingController();
-  final TextEditingController _endDateController = TextEditingController();
+  TextEditingController startDateController = TextEditingController();
+  TextEditingController endDateController = TextEditingController();
+  TextEditingController weight = TextEditingController();
+  TextEditingController duration = TextEditingController();
+  TextEditingController note = TextEditingController();
 
-  // UI State
-  bool showCharts = true;
+  @override
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
+    manager.getWorkoutProgress(widget.program_workout_id);
+  }
 
-  // Data
-  List<WorkoutProgressModel> _workoutProgress = [];
+  @override
+  void dispose() {
+    manager.workoutProgresses.clear();
+    startDateController.dispose();
+    endDateController.dispose();
+    weight.dispose();
+    duration.dispose();
+    note.dispose();
+    super.dispose();
+  }
 
-  final Color cardBlack = Constant.scaffoldColor;
-  final Color panelBlack = const Color(0xff2a2a2a);
-
-  // Pick date
   Future<void> _selectDate(BuildContext context, bool isStart) async {
     final picked = await showDatePicker(
       context: context,
@@ -51,7 +66,6 @@ class WorkoutProgress extends StatelessWidget {
               primary: Colors.teal.shade700,
               onPrimary: Colors.white,
             ),
-            dialogTheme: DialogThemeData(backgroundColor: panelBlack),
           ),
           child: child!,
         );
@@ -62,15 +76,14 @@ class WorkoutProgress extends StatelessWidget {
       final formatted = DateFormat('yyyy-MM-dd').format(picked);
       if (isStart) {
         _startDate = formatted;
-        _startDateController.text = formatted;
+        startDateController.text = formatted;
       } else {
         _endDate = formatted;
-        _endDateController.text = formatted;
+        endDateController.text = formatted;
       }
-      _manager?.updateState();
       if (_startDate.isNotEmpty && _endDate.isNotEmpty) {
-        _manager?.getWorkoutProgress(
-          program_workout_id,
+        manager.getWorkoutProgress(
+          widget.program_workout_id,
           startDate: _startDate,
           endDate: _endDate,
         );
@@ -80,9 +93,6 @@ class WorkoutProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _manager = Manager.get(context);
-    _manager?.getWorkoutProgress(program_workout_id);
-
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {
         if (state is ErrorState) {
@@ -93,45 +103,35 @@ class WorkoutProgress extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        _workoutProgress = _manager!.workoutProgresses;
-        return PopScope(
-          canPop: true,
-          onPopInvokedWithResult: (didPop, result) {
-            _manager!.workoutProgresses.clear();
-            showCharts = true;
-            _startDateController.clear();
-            _endDateController.clear();
-          },
-          child: Scaffold(
-            backgroundColor: cardBlack,
-            appBar: AppBar(
-              backgroundColor: Colors.black,
-              centerTitle: true,
-              elevation: 0,
-              iconTheme: const IconThemeData(color: Colors.white),
-              title: reusableText(
-                content: 'Workout Progress Dashboard',
-                fontColor: Colors.greenAccent,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+        return Scaffold(
+          backgroundColor: Constant.scaffoldColor,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            centerTitle: true,
+            elevation: 0,
+            iconTheme: const IconThemeData(color: Colors.white),
+            title: reusableText(
+              content: 'Workout Progress Dashboard',
+              fontColor: Colors.greenAccent,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
             ),
-            floatingActionButton: FloatingActionButton(
-              backgroundColor: Colors.teal.shade700,
-              child: const Icon(Icons.add, color: Colors.white),
-              onPressed: () => _openAddRecordDialog(context),
+          ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: Colors.teal.shade700,
+            child: const Icon(Icons.add, color: Colors.white),
+            onPressed: () => _openAddRecordDialog(context),
+          ),
+          body: ConditionalBuilder(
+            condition: state is! LoadingState,
+            builder: (_) => Column(
+              children: [
+                _buildToggleButtons(),
+                _buildFilterSection(context),
+                Expanded(child: _buildBodyByState(state, context)),
+              ],
             ),
-            body: ConditionalBuilder(
-              condition: state is! LoadingState,
-              builder: (_) => Column(
-                children: [
-                  _buildToggleButtons(),
-                  _buildFilterSection(context),
-                  Expanded(child: _buildBodyByState(state, context)),
-                ],
-              ),
-              fallback: (_) => const Center(child: CircularProgressIndicator()),
-            ),
+            fallback: (_) => const Center(child: CircularProgressIndicator()),
           ),
         );
       },
@@ -140,7 +140,7 @@ class WorkoutProgress extends StatelessWidget {
 
   Widget _buildBodyByState(BLoCStates state, BuildContext context) {
     if (state is SuccessState || state is UpdateNewState) {
-      if (_workoutProgress.isEmpty) {
+      if (manager.workoutProgresses.isEmpty) {
         final msg = _startDate.isEmpty && _endDate.isEmpty
             ? "No progress records found."
             : "No records found in this date range.";
@@ -170,7 +170,7 @@ class WorkoutProgress extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         GestureDetector(
-          onTap: () => _manager?.getWorkoutProgress(program_workout_id),
+          onTap: () => manager.getWorkoutProgress(widget.program_workout_id),
           child: Container(
             height: 50,
             width: Constant.screenWidth / 3,
@@ -203,12 +203,14 @@ class WorkoutProgress extends StatelessWidget {
       child: Row(
         children: [
           _toggleButton("Charts", showCharts, () {
-            showCharts = true;
-            _manager?.updateState();
+            setState(() {
+              showCharts = true;
+            });
           }),
           _toggleButton("Records", !showCharts, () {
-            showCharts = false;
-            _manager?.updateState();
+            setState(() {
+              showCharts = false;
+            });
           }),
         ],
       ),
@@ -254,7 +256,7 @@ class WorkoutProgress extends StatelessWidget {
             child: _buildDateField(
               context,
               'Start Date',
-              _startDateController,
+              startDateController,
               true,
             ),
           ),
@@ -263,7 +265,7 @@ class WorkoutProgress extends StatelessWidget {
             child: _buildDateField(
               context,
               'End Date',
-              _endDateController,
+              endDateController,
               false,
             ),
           ),
@@ -307,19 +309,20 @@ class WorkoutProgress extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
       child: Column(
         children: [
-          (workoutModel.sets > 0 && workoutModel.reps != null)
+          (widget.workoutModel.sets > 0 && widget.workoutModel.reps != null)
               ? _chartCard(
                   "Lifted Weight Progress",
                   "Track your Lifted Weight over time",
-                  _buildWeightChart(_workoutProgress),
+                  _buildWeightChart(manager.workoutProgresses),
                   Colors.teal.shade400,
                   Colors.teal.shade900,
                 )
-              : (workoutModel.sets > 0 && workoutModel.duration != null)
+              : (widget.workoutModel.sets > 0 &&
+                    widget.workoutModel.duration != null)
               ? _chartCard(
                   "Duration Progress",
                   "Track your Trained Duration over time",
-                  _buildDurationChart(_workoutProgress),
+                  _buildDurationChart(manager.workoutProgresses),
                   Colors.indigo.shade400,
                   Colors.deepPurple.shade900,
                 )
@@ -341,11 +344,11 @@ class WorkoutProgress extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
-          colors: [start.withOpacity(.9), end.withOpacity(.8)],
+          colors: [start.withAlpha(229), end.withAlpha(204)],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.4),
+            color: Colors.black.withAlpha(102),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -378,9 +381,9 @@ class WorkoutProgress extends StatelessWidget {
     return ListView.builder(
       shrinkWrap: true,
       padding: const EdgeInsets.all(16),
-      itemCount: _workoutProgress.length,
+      itemCount: manager.workoutProgresses.length,
       itemBuilder: (_, index) {
-        return _healthCard(_workoutProgress[index], index, context);
+        return _healthCard(manager.workoutProgresses[index], index, context);
       },
     );
   }
@@ -405,7 +408,7 @@ class WorkoutProgress extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Recorded: ${ReusableComponents.formatDateTime(info.recordedAt.toString(),format: 'yyyy/MM/dd')}",
+                "Recorded: ${ReusableComponents.formatDateTime(info.recordedAt.toString(), format: 'yyyy/MM/dd')}",
                 style: const TextStyle(color: Colors.white70),
               ),
               const SizedBox(height: 10),
@@ -433,9 +436,9 @@ class WorkoutProgress extends StatelessWidget {
               icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
               onPressed: () {
                 ReusableComponents.deleteDialog<Manager>(context, () async {
-                  _manager?.deleteWorkoutProgress(
+                  manager.deleteWorkoutProgress(
                     info.id.toString(),
-                    program_workout_id,
+                    widget.program_workout_id,
                     startDate: _startDate,
                     endDate: _endDate,
                   );
@@ -497,7 +500,7 @@ class WorkoutProgress extends StatelessWidget {
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.greenAccent.withOpacity(.2),
+              color: Colors.greenAccent.withAlpha(51),
             ),
             spots: infos
                 .asMap()
@@ -523,7 +526,7 @@ class WorkoutProgress extends StatelessWidget {
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.blueAccent.withOpacity(.2),
+              color: Colors.blueAccent.withAlpha(51),
             ),
             spots: infos
                 .asMap()
@@ -567,92 +570,74 @@ class WorkoutProgress extends StatelessWidget {
   }
 
   Future<void> _openAddRecordDialog(BuildContext context) async {
-    final weight = TextEditingController();
-    final duration = TextEditingController();
-    final note = TextEditingController();
-
+    weight.clear();
+    duration.clear();
+    note.clear();
     await showDialog(
       context: context,
       builder: (dialogCtx) {
-        return BlocProvider.value(
-          value: Manager.get(context),
-          child: BlocBuilder<Manager, BLoCStates>(
-            builder: (_, state) {
-              return AlertDialog(
-                backgroundColor: const Color(0xff2b2b2b),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                title: const Text(
-                  'Add New Record',
-                  style: TextStyle(color: Colors.white),
-                ),
-                content: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      if (workoutModel.reps != null)
-                      _dialogTextField("Weight (kg)", weight, required: true),
-                      if (workoutModel.reps == null)
-                      _dialogTextField(
-                        "Duration (min)",
-                        duration,
-                        required: true,
-                      ),
-                      _dialogTextField("Note", note, isNumber: false),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogCtx),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                  ConditionalBuilder(
-                    condition: state is! LoadingState,
-                    builder: (_) => ElevatedButton(
-                      onPressed: () {
-                        if ((workoutModel.reps != null &&
-                                weight.text.isEmpty) ||
-                            (workoutModel.reps == null &&
-                                duration.text.isEmpty)) {
-                          ReusableComponents.showToast(
-                            'Weight or Duration are required',
-                            background: Colors.red,
-                          );
-                          return;
-                        }
-
-                        final data = {
-                          "weight": double.tryParse(weight.text),
-                          "duration": double.tryParse(duration.text),
-                          "note": note.text.isNotEmpty ? note.text : null,
-                          "program_workout_id" : program_workout_id
-                        };
-                        Manager.get(context).logWorkoutProgress(data).then((_) {
-                          ReusableComponents.showToast(
-                            'Record added successfully',
-                            background: Colors.green,
-                          );
-                          Navigator.pop(dialogCtx);
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal.shade700,
-                      ),
-                      child: const Text(
-                        'Add',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    fallback: (_) => const CircularProgressIndicator(),
-                  ),
-                ],
-              );
-            },
+        return AlertDialog(
+          backgroundColor: const Color(0xff2b2b2b),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
           ),
+          title: const Text(
+            'Add New Record',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                if (widget.workoutModel.reps != null)
+                  _dialogTextField("Weight (kg)", weight, required: true),
+                if (widget.workoutModel.reps == null)
+                  _dialogTextField(
+                    "Duration (min)",
+                    duration,
+                    required: true,
+                  ),
+                _dialogTextField("Note", note, isNumber: false),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if ((widget.workoutModel.reps != null &&
+                        weight.text.isEmpty) ||
+                    (widget.workoutModel.reps == null &&
+                        duration.text.isEmpty)) {
+                  ReusableComponents.showToast(
+                    'Weight or Duration are required',
+                    background: Colors.red,
+                  );
+                  return;
+                }
+                final data = {
+                  "weight": double.tryParse(weight.text),
+                  "duration": double.tryParse(duration.text),
+                  "note": note.text.isNotEmpty ? note.text : null,
+                  "program_workout_id": widget.program_workout_id,
+                };
+                manager.logWorkoutProgress(data);
+                Navigator.pop(dialogCtx);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal.shade700,
+              ),
+              child: const Text(
+                'Add',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
         );
       },
     );

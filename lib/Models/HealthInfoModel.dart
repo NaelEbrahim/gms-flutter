@@ -41,11 +41,8 @@ class HealthInfoModel {
     );
   }
 
-  static List<HealthInfoModel> parseList(dynamic jsonList) {
-    if (jsonList == null || (jsonList as List).isEmpty) return [];
-    return jsonList
-        .map<HealthInfoModel>((e) => HealthInfoModel.fromJson(e))
-        .toList();
+  static List<HealthInfoModel> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => HealthInfoModel.fromJson(e)).toList();
   }
 
   Map<String, dynamic> toJson() {

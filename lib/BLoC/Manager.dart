@@ -21,6 +21,7 @@ import 'package:gms_flutter/Models/SessionsModel.dart';
 import 'package:gms_flutter/Models/WorkoutProgressModel.dart';
 import 'package:gms_flutter/Remote/Dio_Linker.dart';
 import 'package:gms_flutter/Remote/End_Points.dart';
+import 'package:gms_flutter/Shared/Components.dart';
 import 'package:gms_flutter/Shared/SecureStorage.dart';
 import 'package:gms_flutter/Shared/SharedPrefHelper.dart';
 import 'package:gms_flutter/main.dart';
@@ -33,16 +34,6 @@ class Manager extends Cubit<BLoCStates> {
   Manager() : super(InitialState());
 
   static Manager get(BuildContext context) => BlocProvider.of(context);
-
-  bool eyeVisible = true;
-
-  IconData eyeIcon = Icons.visibility;
-
-  void togglePasswordVisibility() {
-    eyeVisible = !eyeVisible;
-    eyeIcon = eyeVisible ? Icons.visibility : Icons.visibility_off;
-    emit(UpdateNewState());
-  }
 
   void updateState() {
     emit(UpdateNewState());
@@ -59,6 +50,9 @@ class Manager extends Cubit<BLoCStates> {
           await TokenStorage.writeAccessToken(loginModel.accessToken);
           await TokenStorage.writeRefreshToken(loginModel.refreshToken);
           emit(SuccessState());
+          MyApp.navigatorKey.currentState?.pushReplacement(
+            MaterialPageRoute(builder: (_) => Base()),
+          );
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -67,25 +61,33 @@ class Manager extends Cubit<BLoCStates> {
   }
 
   void logout() async {
-    final accessToken = await TokenStorage.readRefreshToken();
-    if (accessToken != null) {
-      emit(LoadingState());
-      await Dio_Linker.postData(url: LOGOUT)
-          .then((value) async {
-            await SharedPrefHelper.clear();
-            await TokenStorage.deleteAccessToken();
-            await TokenStorage.deleteRefreshToken();
-            emit(SuccessState());
-            MyApp.navigatorKey.currentState?.pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => Login()),
-              (_) => false,
-            );
-          })
-          .catchError((error) {
-            String errorMessage = handleDioError(error);
-            emit(ErrorState(errorMessage));
-          });
-    }
+    emit(LoadingState());
+    await Dio_Linker.postData(url: LOGOUT)
+        .then((value) async {
+          emit(SuccessState());
+          performLogout();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void performLogout() async {
+    await SharedPrefHelper.clear();
+    await TokenStorage.deleteAccessToken();
+    await TokenStorage.deleteRefreshToken();
+    Future.delayed(Duration(milliseconds: 50), () {
+      final navigator = MyApp.navigatorKey.currentState;
+      if (navigator != null) {
+        ReusableComponents.showToast(
+          'Your session expired. Please log in again to continue.',
+          background: Colors.red,
+        );
+        // navigate
+        navigator.pushReplacement(MaterialPageRoute(builder: (_) => Login()));
+      }
+    });
   }
 
   String? message;
@@ -146,13 +148,13 @@ class Manager extends Cubit<BLoCStates> {
     return 'Unexpected error, try again later';
   }
 
-  List<ClassesModel> userClassesModel = [];
+  List<ClassesModel> userClasses = [];
 
-  void userClasses() {
+  void getUserClasses() {
     emit(LoadingState());
     Dio_Linker.getData(url: USERCLASSES)
         .then((value) {
-          userClassesModel = ClassesModel.parseClassesList(value.data);
+          userClasses = ClassesModel.parseClassesList(value.data);
           emit(SuccessState());
         })
         .catchError((error) {
@@ -199,7 +201,9 @@ class Manager extends Cubit<BLoCStates> {
           url: USERPRIVATECOACHES + SharedPrefHelper.getString('id').toString(),
         )
         .then((value) {
-          userPrivateCoaches = PrivateCoachModel.parseList(value.data);
+          userPrivateCoaches = PrivateCoachModel.parseList(
+            value.data['message'],
+          );
           emit(SuccessState());
         })
         .catchError((error) {
@@ -230,11 +234,15 @@ class Manager extends Cubit<BLoCStates> {
         });
   }
 
-  Future<void> logHealthInfo(Map<String, dynamic> data) {
+  void logHealthInfo(Map<String, dynamic> data) {
     emit(LoadingState());
-    return Dio_Linker.postData(url: LOGHEALTHINFO, data: data)
+    Dio_Linker.postData(url: LOGHEALTHINFO, data: data)
         .then((value) {
           userHealthInfo();
+          ReusableComponents.showToast(
+            'Record added successfully',
+            background: Colors.green,
+          );
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -280,25 +288,20 @@ class Manager extends Cubit<BLoCStates> {
           emit(SuccessState());
         })
         .catchError((error) {
-          print(error);
           String errorMessage = handleDioError(error);
           emit(ErrorState(errorMessage));
         });
   }
 
-  bool darkMode = false;
-
-  void changeAppTheme() {
-    darkMode = !darkMode;
-    SharedPrefHelper.saveBool('appTheme', darkMode);
+  Future<void> changeAppTheme() async {
+    final darkMode = !(SharedPrefHelper.getBool('appTheme') ?? true);
+    await SharedPrefHelper.saveBool('appTheme', darkMode);
     emit(UpdateNewState());
   }
 
-  bool appNotifications = true;
-
-  void changeAppNotification() {
-    appNotifications = !appNotifications;
-    SharedPrefHelper.saveBool('appNotifications', appNotifications);
+  void changeAppNotification() async {
+    final appNotifications = !(SharedPrefHelper.getBool('appNotifications') ?? true);
+    await SharedPrefHelper.saveBool('appNotifications', appNotifications);
     emit(UpdateNewState());
   }
 
@@ -307,6 +310,13 @@ class Manager extends Cubit<BLoCStates> {
     Dio_Linker.putData(url: CHANGEPASSWORD, data: data)
         .then((value) {
           emit(SuccessState());
+          final navigator = MyApp.navigatorKey.currentState;
+          if (navigator != null) {
+            ReusableComponents.showToast(
+              'password Updated',
+              background: Colors.green,
+            );
+          }
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -343,10 +353,7 @@ class Manager extends Cubit<BLoCStates> {
           data: data,
         )
         .then((value) {
-          SharedPrefHelper.saveUserData(ProfileModel.fromJson(value.data).data);
-          MyApp.navigatorKey.currentState?.pushReplacement(
-            MaterialPageRoute(builder: (_) => Base()),
-          );
+          getUserProfile();
           emit(SuccessState());
         })
         .catchError((error) {
@@ -355,27 +362,11 @@ class Manager extends Cubit<BLoCStates> {
         });
   }
 
-  Future<void> updateProfileImage(XFile image) async {
+  Future<void> updateProfileImage(FormData data) async {
     emit(LoadingState());
-    Dio_Linker.putData(
-          url: UPLOADPROFILEIMAGE,
-          data: FormData.fromMap({
-            'id': SharedPrefHelper.getString('id').toString(),
-            'image': await MultipartFile.fromFile(
-              image.path,
-              filename: image.name,
-            ),
-          }),
-        )
+    Dio_Linker.putData(url: UPLOADPROFILEIMAGE, data: data)
         .then((value) {
-          SharedPrefHelper.saveString(
-            'key',
-            value.data['message']['profileImagePath'],
-          );
-          MyApp.navigatorKey.currentState?.pushReplacement(
-            MaterialPageRoute(builder: (_) => Base()),
-          );
-          emit(SuccessState());
+          getUserProfile();
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -387,7 +378,7 @@ class Manager extends Cubit<BLoCStates> {
     emit(LoadingState());
     Dio_Linker.postData(url: ADDCLASSFEEDBACK, data: data)
         .then((value) {
-          userClasses();
+          getUserClasses();
           MyApp.navigatorKey.currentState?.pop();
         })
         .catchError((error) {
@@ -406,7 +397,7 @@ class Manager extends Cubit<BLoCStates> {
           },
         )
         .then((value) {
-          userClasses();
+          getUserClasses();
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -419,7 +410,6 @@ class Manager extends Cubit<BLoCStates> {
     Dio_Linker.postData(url: ADDSESSIONFEEDBACK, data: data)
         .then((value) {
           userSessions();
-          MyApp.navigatorKey.currentState?.pop();
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -450,7 +440,6 @@ class Manager extends Cubit<BLoCStates> {
     Dio_Linker.postData(url: UPDATESESSIONRATE, data: data)
         .then((value) {
           userSessions();
-          MyApp.navigatorKey.currentState?.pop();
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -478,7 +467,6 @@ class Manager extends Cubit<BLoCStates> {
     Dio_Linker.postData(url: ADDDIETFEEDBACK, data: data)
         .then((value) {
           userDietPlans();
-          MyApp.navigatorKey.currentState?.pop();
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -491,7 +479,6 @@ class Manager extends Cubit<BLoCStates> {
     Dio_Linker.postData(url: UPDATEDIETRATE, data: data)
         .then((value) {
           userDietPlans();
-          MyApp.navigatorKey.currentState?.pop();
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -505,7 +492,7 @@ class Manager extends Cubit<BLoCStates> {
     emit(LoadingState());
     Dio_Linker.getData(url: GETCLASSPROGRAMS + classId)
         .then((value) {
-          classPrograms = ProgramModel.paresList(value.data['message']);
+          classPrograms = ProgramModel.parseList(value.data['message']);
           emit(SuccessState());
         })
         .catchError((error) {
@@ -519,7 +506,6 @@ class Manager extends Cubit<BLoCStates> {
     Dio_Linker.postData(url: UPDATECOACHRATE, data: data)
         .then((value) {
           userCoaches();
-          MyApp.navigatorKey.currentState?.pop();
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -626,11 +612,15 @@ class Manager extends Cubit<BLoCStates> {
         });
   }
 
-  Future<void> logWorkoutProgress(Map<String, dynamic> data) {
+  void logWorkoutProgress(Map<String, dynamic> data) {
     emit(LoadingState());
-    return Dio_Linker.postData(url: LOGWORKOUTPROGRESS, data: data)
+    Dio_Linker.postData(url: LOGWORKOUTPROGRESS, data: data)
         .then((value) {
           getWorkoutProgress(data['program_workout_id']);
+          ReusableComponents.showToast(
+            'Record added successfully',
+            background: Colors.green,
+          );
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);

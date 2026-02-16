@@ -7,13 +7,26 @@ import 'package:gms_flutter/Modules/ForgotPassword/ForgotPassword.dart';
 import 'package:gms_flutter/Shared/Components.dart';
 import 'package:gms_flutter/Shared/Constant.dart';
 
-import 'Base.dart';
+class Login extends StatefulWidget {
+  const Login({super.key});
 
-final _formKey = GlobalKey<FormState>();
-final _emailController = TextEditingController();
-final _passwordController = TextEditingController();
+  @override
+  State<Login> createState() => _LoginState();
+}
 
-class Login extends StatelessWidget {
+class _LoginState extends State<Login> {
+  bool _isPasswordHide = true;
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -32,20 +45,6 @@ class Login extends StatelessWidget {
         : targetHeaderHeight;
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {
-        // success
-        if (state is SuccessState) {
-          ReusableComponents.showToast(
-            Manager.get(context).message.toString(),
-            background: Colors.green,
-          );
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Base()),
-            (route) => false,
-          );
-          _emailController.clear();
-          _passwordController.clear();
-        }
         // error
         if (state is ErrorState) {
           ReusableComponents.showToast(
@@ -140,9 +139,7 @@ class Login extends StatelessWidget {
                               children: [
                                 reusableTextFormField(
                                   hint: 'Email Address',
-                                  prefixIcon: const Icon(
-                                    Icons.email_outlined,
-                                  ),
+                                  prefixIcon: const Icon(Icons.email_outlined),
                                   controller: _emailController,
                                   textInputType: TextInputType.emailAddress,
                                   radius: 15,
@@ -162,10 +159,14 @@ class Login extends StatelessWidget {
                                   hint: 'Password',
                                   prefixIcon: const Icon(Icons.lock_outline),
                                   controller: _passwordController,
-                                  obscureText: manager.eyeVisible,
-                                  suffixIcon: manager.eyeIcon,
+                                  obscureText: _isPasswordHide,
+                                  suffixIcon: _isPasswordHide
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
                                   suffixIconFunction: () {
-                                    manager.togglePasswordVisibility();
+                                    setState(() {
+                                      _isPasswordHide = !_isPasswordHide;
+                                    });
                                   },
                                   textInputAction: TextInputAction.done,
                                   radius: 15,
@@ -214,8 +215,7 @@ class Login extends StatelessWidget {
                                       if (_formKey.currentState!.validate()) {
                                         manager.login({
                                           'email': _emailController.text,
-                                          'password':
-                                              _passwordController.text,
+                                          'password': _passwordController.text,
                                         });
                                       }
                                     },
@@ -231,9 +231,7 @@ class Login extends StatelessWidget {
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                         ),
-                                        borderRadius: BorderRadius.circular(
-                                          15,
-                                        ),
+                                        borderRadius: BorderRadius.circular(15),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.green.shade700,
@@ -264,9 +262,7 @@ class Login extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: keyboardHeight > 0 ? keyboardHeight : 0,
-                      ),
+                      SizedBox(height: keyboardHeight > 0 ? keyboardHeight : 0),
                     ],
                   ),
                 );

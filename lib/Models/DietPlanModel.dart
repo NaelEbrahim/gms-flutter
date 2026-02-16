@@ -87,16 +87,16 @@ class DayMealsModel {
 
   factory DayMealsModel.fromJson(Map<String, dynamic> json) {
     return DayMealsModel(
-      breakfast: (json['breakfast'] as List?)
+      breakfast: (json['Breakfast'] as List?)
           ?.map((e) => MealModel.fromJson(e))
           .toList(),
-      lunch: (json['lunch'] as List?)
+      lunch: (json['Lunch'] as List?)
           ?.map((e) => MealModel.fromJson(e))
           .toList(),
-      dinner: (json['dinner'] as List?)
+      dinner: (json['Dinner'] as List?)
           ?.map((e) => MealModel.fromJson(e))
           .toList(),
-      snack: (json['snack'] as List?)
+      snack: (json['Snack'] as List?)
           ?.map((e) => MealModel.fromJson(e))
           .toList(),
     );

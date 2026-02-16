@@ -29,13 +29,7 @@ class SubscriptionsHistoryModel {
     );
   }
 
-  static List<SubscriptionsHistoryModel> parseList(jsonList) {
-    List<SubscriptionsHistoryModel> result = [];
-    if (jsonList != null && (jsonList as List).isNotEmpty) {
-      for (var element in jsonList) {
-        result.add(SubscriptionsHistoryModel.fromJson(element));
-      }
-    }
-    return result;
+  static List<SubscriptionsHistoryModel> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => SubscriptionsHistoryModel.fromJson(e)).toList();
   }
 }

@@ -12,85 +12,108 @@ import 'End_Points.dart';
 class AuthInterceptor extends Interceptor {
   final Dio dio;
   bool _isRefreshing = false;
-  final noAuthEndpoints = {LOGIN, REFRESHTOKEN};
+
+  /// Use path fragments, not full URLs
+  final List<String> noAuthEndpoints = [
+    LOGIN,
+    REFRESHTOKEN,
+    FORGOTPASSWORD,
+    VERIFYCODE,
+    RESETFORGOTPASSWORD,
+  ];
 
   AuthInterceptor(this.dio);
 
+  bool _isNoAuth(RequestOptions options) {
+    return noAuthEndpoints.any(
+          (e) => options.path.contains(e),
+    );
+  }
+
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
-    // Skip adding token to these APIs
-    if (noAuthEndpoints.contains(options.path)) {
-      return handler.next(options);
+  void onRequest(RequestOptions options,
+      RequestInterceptorHandler handler,) async {
+    /// ✅ DO NOT attach JWT
+    if (_isNoAuth(options)) {
+      handler.next(options);
+      return;
     }
-    final access = await TokenStorage.readAccessToken();
-    if (access != null) {
-      options.headers['Authorization'] = 'Bearer $access';
+
+    final token = await TokenStorage.readAccessToken();
+    if (token != null && token.isNotEmpty) {
+      options.headers['Authorization'] = 'Bearer $token';
     }
+
     handler.next(options);
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) async {
+  void onError(DioException err,
+      ErrorInterceptorHandler handler,) async {
     final req = err.requestOptions;
-    // Skip refresh logic for these APIs
-    if (noAuthEndpoints.contains(req.path)) {
-      return handler.next(err);
-    }
-    if (err.response?.statusCode == 401 && !req.extra.containsKey('retry')) {
-      try {
-        final refreshed = await _handleRefreshToken();
-        if (refreshed) {
-          final opts = Options(
-            method: req.method,
-            headers: {
-              ...req.headers,
-              'Authorization': 'Bearer ${await TokenStorage.readAccessToken()}',
-            },
-            extra: {...req.extra, 'retry': true},
-          );
 
-          final cloneResponse = await dio.request(
-            req.path,
-            data: req.data,
-            queryParameters: req.queryParameters,
-            options: opts,
-          );
-
-          return handler.resolve(cloneResponse);
-        } else {
-          Manager manager = Manager();
-          manager.logout();
-          Future.microtask(() {
-            MyApp.navigatorKey.currentState?.pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => Login()),
-              (_) => false,
-            );
-          });
-          ReusableComponents.showToast(
-            'Your session expired. Please log in again to continue.',
-            background: Colors.red,
-          );
-          handler.next(err);
-        }
-      } catch (_) {
-        handler.next(err);
-      }
-    } else {
+    /// ✅ ABSOLUTE BLOCK: no-auth APIs
+    if (_isNoAuth(req)) {
       handler.next(err);
+      return;
     }
+
+    /// Only handle 401 once
+    if (err.response?.statusCode != 401 ||
+        req.extra['retry'] == true) {
+      handler.next(err);
+      return;
+    }
+
+    final refreshed = await _refreshToken();
+
+    if (!refreshed) {
+      Manager().logout();
+      Future.microtask(() {
+        MyApp.navigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => Login()),
+              (_) => false,
+        );
+      });
+
+      ReusableComponents.showToast(
+        'Your session expired. Please log in again.',
+        background: Colors.red,
+      );
+
+      handler.next(err);
+      return;
+    }
+
+    final newToken = await TokenStorage.readAccessToken();
+
+    final response = await dio.request(
+      req.path,
+      data: req.data,
+      queryParameters: req.queryParameters,
+      options: Options(
+        method: req.method,
+        headers: {
+          ...req.headers,
+          'Authorization': 'Bearer $newToken',
+        },
+        extra: {...req.extra, 'retry': true},
+      ),
+    );
+
+    handler.resolve(response);
   }
 
-  Future<bool> _handleRefreshToken() async {
+  Future<bool> _refreshToken() async {
     if (_isRefreshing) {
       while (_isRefreshing) {
-        await Future.delayed(Duration(milliseconds: 150));
+        await Future.delayed(const Duration(milliseconds: 100));
       }
       return (await TokenStorage.readAccessToken()) != null;
     }
+
     _isRefreshing = true;
+
     try {
       final refresh = await TokenStorage.readRefreshToken();
       if (refresh == null) return false;
@@ -99,13 +122,17 @@ class AuthInterceptor extends Interceptor {
         url: REFRESHTOKEN,
         data: {'refreshToken': refresh},
       );
-      final newAccess = response.data['accessToken'] as String?;
-      final newRefresh = response.data['refreshToken'] as String?;
-      if (newAccess != null && newRefresh != null) {
-        await TokenStorage.writeAccessToken(newAccess);
+
+      final access = response.data['accessToken'];
+      final newRefresh = response.data['refreshToken'];
+
+      if (access != null && newRefresh != null) {
+        await TokenStorage.writeAccessToken(access);
         await TokenStorage.writeRefreshToken(newRefresh);
+        return true;
       }
-      return newAccess != null;
+
+      return false;
     } catch (_) {
       await TokenStorage.deleteAccessToken();
       await TokenStorage.deleteRefreshToken();
