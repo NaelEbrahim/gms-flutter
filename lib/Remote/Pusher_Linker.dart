@@ -4,7 +4,8 @@ import 'Dio_Linker.dart';
 import 'End_Points.dart';
 
 class Pusher_Linker {
-  static final PusherChannelsFlutter _pusher = PusherChannelsFlutter.getInstance();
+  static final PusherChannelsFlutter _pusher =
+      PusherChannelsFlutter.getInstance();
   static bool _isInitialized = false;
   static bool isSubscribe = false;
 
@@ -14,7 +15,7 @@ class Pusher_Linker {
       apiKey: "d044493efec8a33cec65",
       cluster: "ap2",
       onEvent: (event) {
-        print("📩 Event: ${event.eventName} - ${event.data}");
+        //
       },
       onAuthorizer: (channelName, socketId, options) async {
         print("Authorizing: $channelName | socket: $socketId");
@@ -25,14 +26,13 @@ class Pusher_Linker {
           );
           return response.data;
         } catch (e) {
-          print("AUTH ERROR: $e");
+          //
         }
       },
       onError: (message, code, e) {
-        print("Pusher Error: $message (Code: $code, Exception: $e)");
+        //
       },
       onConnectionStateChange: (current, previous) {
-        print("Connection changed: $previous → $current");
         // Auto reconnect
         if (current == "DISCONNECTED") {
           Future.delayed(Duration(seconds: 2), () {
@@ -43,14 +43,12 @@ class Pusher_Linker {
     );
     await _pusher.connect();
     _isInitialized = true;
-    print("Pusher connected.");
   }
 
   static Future<void> subscribeToUserChannel(
     Function(String data) onIncomingMessage,
   ) async {
     if (isSubscribe) {
-      print("Already subscribed");
       return;
     }
     final channelName = getChannelName();
@@ -62,12 +60,10 @@ class Pusher_Linker {
         }
       },
       onSubscriptionSucceeded: (_) {
-        print("Subscribed to user channel: $channelName");
         isSubscribe = true;
       },
       onSubscriptionError: (msg, e) {
         isSubscribe = false;
-        print("Subscription error on $channelName: $msg");
       },
     );
   }
@@ -79,13 +75,11 @@ class Pusher_Linker {
     if (isSubscribe) {
       await _pusher.unsubscribe(channelName: channelName);
       isSubscribe = false;
-      print("Unsubscribed from $channelName");
     }
   }
 
   static void disconnect() {
     _pusher.disconnect();
-    print("👋 Pusher disconnected.");
   }
 
   static String getChannelName() {
