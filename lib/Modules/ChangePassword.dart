@@ -7,7 +7,6 @@ import 'package:gms_flutter/BLoC/States.dart';
 import '../../Shared/Components.dart';
 import '../../Shared/Constant.dart';
 
-
 class ChangePassword extends StatefulWidget {
   const ChangePassword({super.key});
 
@@ -16,19 +15,19 @@ class ChangePassword extends StatefulWidget {
 }
 
 class _ChangePasswordState extends State<ChangePassword> {
-  bool _isOldPasswordHide = true;
-  bool _isNewPasswordHide = true;
-  bool _isConfirmNewPasswordHide = true;
-  final _resetFormKey = GlobalKey<FormState>();
-  final _oldPasswordController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  bool isOldPasswordHide = true;
+  bool isNewPasswordHide = true;
+  bool isConfirmNewPasswordHide = true;
+  final resetFormKey = GlobalKey<FormState>();
+  TextEditingController oldPasswordController = TextEditingController();
+  TextEditingController newPasswordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
-    _oldPasswordController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
+    oldPasswordController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -45,13 +44,12 @@ class _ChangePasswordState extends State<ChangePassword> {
         }
       },
       builder: (context, state) {
-        var manager = Manager.get(context);
         return Scaffold(
           backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             foregroundColor: Colors.white,
             title: reusableText(
-              content: 'Update Password',
+              content: 'Change Password',
               fontSize: 22.0,
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
@@ -61,12 +59,12 @@ class _ChangePasswordState extends State<ChangePassword> {
             elevation: 0,
           ),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(15.0),
+            padding: const EdgeInsets.all(10.0),
             child: Form(
-              key: _resetFormKey,
+              key: resetFormKey,
               child: Column(
                 children: [
-                  Icon(Icons.lock, size: 100, color: Colors.teal.shade700),
+                  Icon(Icons.lock, size: 100, color: Colors.teal),
                   const SizedBox(height: 20),
                   const SizedBox(height: 10),
                   reusableText(
@@ -85,19 +83,16 @@ class _ChangePasswordState extends State<ChangePassword> {
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: reusableTextFormField(
-                        controller: _oldPasswordController,
+                        controller: oldPasswordController,
                         hint: "Old Password",
-                        prefixIcon: Icon(
-                          Icons.key,
-                          color: Colors.teal.shade700,
-                        ),
-                        obscureText: _isOldPasswordHide,
-                        suffixIcon: _isOldPasswordHide
+                        prefixIcon: Icon(Icons.key),
+                        obscureText: isOldPasswordHide,
+                        suffixIcon: isOldPasswordHide
                             ? Icons.visibility
                             : Icons.visibility_off,
                         suffixIconFunction: () {
                           setState(() {
-                            _isOldPasswordHide = !_isOldPasswordHide;
+                            isOldPasswordHide = !isOldPasswordHide;
                           });
                         },
                         radius: 12,
@@ -108,9 +103,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                           if (value.length < 8) {
                             return 'must be at least 8 characters';
                           }
-                          if (!RegExp(
-                            r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$&*])\S{8,}$',
-                          ).hasMatch(value)) {
+                          if (!RegExp(Constant.passwordRegex).hasMatch(value)) {
                             return 'Password must contain 1 uppercase, 1 lowercase, 1 digit and 1 special char';
                           }
                           return null;
@@ -128,19 +121,18 @@ class _ChangePasswordState extends State<ChangePassword> {
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: reusableTextFormField(
-                        controller: _newPasswordController,
+                        controller: newPasswordController,
                         hint: "New Password",
                         prefixIcon: Icon(
                           Icons.lock_outline,
-                          color: Colors.teal.shade700,
                         ),
-                        obscureText: _isNewPasswordHide,
-                        suffixIcon: _isNewPasswordHide
+                        obscureText: isNewPasswordHide,
+                        suffixIcon: isNewPasswordHide
                             ? Icons.visibility
                             : Icons.visibility_off,
                         suffixIconFunction: () {
                           setState(() {
-                            _isNewPasswordHide = !_isNewPasswordHide;
+                            isNewPasswordHide = !isNewPasswordHide;
                           });
                         },
                         radius: 12,
@@ -151,9 +143,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                           if (value.length < 8) {
                             return 'must be at least 8 characters';
                           }
-                          if (!RegExp(
-                            r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$&*])\S{8,}$',
-                          ).hasMatch(value)) {
+                          if (!RegExp(Constant.passwordRegex).hasMatch(value)) {
                             return 'Password must contain 1 uppercase, 1 lowercase, 1 digit and 1 special char';
                           }
                           return null;
@@ -171,20 +161,17 @@ class _ChangePasswordState extends State<ChangePassword> {
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: reusableTextFormField(
-                        controller: _confirmPasswordController,
+                        controller: confirmPasswordController,
                         hint: "Confirm Password",
-                        prefixIcon: Icon(
-                          Icons.lock_reset,
-                          color: Colors.teal.shade700,
-                        ),
-                        obscureText: _isConfirmNewPasswordHide,
-                        suffixIcon: _isConfirmNewPasswordHide
+                        prefixIcon: Icon(Icons.lock_reset),
+                        obscureText: isConfirmNewPasswordHide,
+                        suffixIcon: isConfirmNewPasswordHide
                             ? Icons.visibility
                             : Icons.visibility_off,
                         suffixIconFunction: () {
                           setState(() {
-                            _isConfirmNewPasswordHide =
-                                !_isConfirmNewPasswordHide;
+                            isConfirmNewPasswordHide =
+                                !isConfirmNewPasswordHide;
                           });
                         },
                         radius: 12,
@@ -192,8 +179,8 @@ class _ChangePasswordState extends State<ChangePassword> {
                           if (value == null || value.isEmpty) {
                             return 'confirm password is required';
                           }
-                          if (_newPasswordController.text !=
-                              _confirmPasswordController.text) {
+                          if (newPasswordController.text !=
+                              confirmPasswordController.text) {
                             return 'Passwords do not match';
                           }
                           return null;
@@ -206,18 +193,18 @@ class _ChangePasswordState extends State<ChangePassword> {
                     condition: state is! LoadingState,
                     builder: (context) => GestureDetector(
                       onTap: () {
-                        if (_resetFormKey.currentState!.validate()) {
-                          manager.changePassword({
-                            'oldPassword': _oldPasswordController.text,
-                            'newPassword': _newPasswordController.text,
+                        if (resetFormKey.currentState!.validate()) {
+                          Manager.get(context).changePassword({
+                            'oldPassword': oldPasswordController.text,
+                            'newPassword': newPasswordController.text,
                           });
                         }
                       },
                       child: Container(
-                        width: double.infinity,
+                        width: Constant.screenWidth / 2,
                         height: 50,
                         decoration: BoxDecoration(
-                          color: Colors.teal.shade700,
+                          color: Colors.teal,
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Center(

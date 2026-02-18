@@ -78,167 +78,163 @@ class _ProfileState extends State<Profile> {
           elevation: 0,
         ),
         body: SingleChildScrollView(
-          child: Center(
-            child: ConditionalBuilder(
-              condition: state is! LoadingState,
-              builder: (context) => Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  children: [
-                    Container(
-                      height: Constant.screenHeight * 0.35,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.teal.shade700,
-                            Constant.scaffoldColor,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(76),
-                            blurRadius: 10,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
+          padding: const EdgeInsets.all(10.0),
+          child: ConditionalBuilder(
+            condition: state is! LoadingState,
+            builder: (context) => Column(
+              children: [
+                Container(
+                  height: Constant.screenHeight * 0.35,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.teal.shade700,
+                        Constant.scaffoldColor,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(76),
+                        blurRadius: 10,
+                        offset: const Offset(0, 6),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 20),
+                      Stack(
                         children: [
-                          const SizedBox(height: 20),
-                          Stack(
-                            children: [
-                              CircleAvatar(
-                                radius: 80,
-                                backgroundColor: Colors.teal.withAlpha(76),
-                                child: ClipOval(
-                                  child: (profileImage != null)
-                                      ? Image.network(
-                                          Constant.mediaURL +
-                                              profileImage.toString(),
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, _, _) => Icon(
-                                            FontAwesomeIcons.circleUser,
-                                            color: Colors.greenAccent,
-                                            size: 80,
-                                          ),
-                                        )
-                                      : Icon(
-                                          FontAwesomeIcons.circleUser,
-                                          color: Colors.greenAccent,
-                                          size: 80,
-                                        ),
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                right: 4,
-                                child: InkWell(
-                                  onTap: () async {
-                                    final XFile? image =
-                                        await ReusableComponents.pickImage();
-                                    if (image != null) {
-                                      FormData formData = FormData.fromMap({
-                                        'id': SharedPrefHelper.getString(
-                                          'id',
-                                        ).toString(),
-                                        'image': await MultipartFile.fromFile(
-                                          image.path,
-                                          filename: image.name,
-                                        ),
-                                      });
-                                      manager.updateProfileImage(formData);
-                                    }
-                                  },
-                                  child: CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor: Colors.greenAccent,
-                                    child: const Icon(
-                                      Icons.camera_alt,
-                                      size: 20,
-                                      color: Colors.black,
+                          CircleAvatar(
+                            radius: 80,
+                            backgroundColor: Colors.teal.withAlpha(76),
+                            child: ClipOval(
+                              child: (profileImage != null)
+                                  ? Image.network(
+                                      Constant.mediaURL +
+                                          profileImage.toString(),
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => Icon(
+                                        FontAwesomeIcons.circleUser,
+                                        color: Colors.greenAccent,
+                                        size: 80,
+                                      ),
+                                    )
+                                  : Icon(
+                                      FontAwesomeIcons.circleUser,
+                                      color: Colors.greenAccent,
+                                      size: 80,
                                     ),
-                                  ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 4,
+                            child: InkWell(
+                              onTap: () async {
+                                final XFile? image =
+                                    await ReusableComponents.pickImage();
+                                if (image != null) {
+                                  FormData formData = FormData.fromMap({
+                                    'id': SharedPrefHelper.getString(
+                                      'id',
+                                    ).toString(),
+                                    'image': await MultipartFile.fromFile(
+                                      image.path,
+                                      filename: image.name,
+                                    ),
+                                  });
+                                  manager.updateProfileImage(formData);
+                                }
+                              },
+                              child: CircleAvatar(
+                                radius: 18,
+                                backgroundColor: Colors.greenAccent,
+                                child: const Icon(
+                                  Icons.camera_alt,
+                                  size: 20,
+                                  color: Colors.black,
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                          const SizedBox(height: 12),
-                          reusableText(
-                            content:
-                                "${firstNameController.text} ${lastNameController.text}",
-                            fontSize: 22.0,
-                            fontWeight: FontWeight.bold,
-                            fontColor: Colors.white,
-                          ),
-                          const SizedBox(height: 4),
-                          reusableText(
-                            content: emailController.text,
-                            fontSize: 15.0,
-                            fontColor: Colors.white70,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          const SizedBox(height: 8),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    infoCard("Phone Number", phoneController.text, Icons.phone),
-                    infoCard("Gender", genderController.text, Icons.person),
-                    infoCard("Date of Birth", dobController.text, Icons.cake),
-                    const SizedBox(height: 10.0),
-                    GestureDetector(
-                      onTap: () {
-                        _showEditProfile(context);
-                      },
-                      child: Container(
-                        width: Constant.screenWidth / 2,
-                        height: 50.0,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.teal.shade700,
-                              Constant.scaffoldColor,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withAlpha(76),
-                              blurRadius: 10,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.edit, color: Colors.white),
-                            const SizedBox(width: 10.0),
-                            reusableText(
-                              content: 'Edit Profile',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13.0,
-                            ),
-                          ],
-                        ),
+                      const SizedBox(height: 12),
+                      reusableText(
+                        content:
+                            "${firstNameController.text} ${lastNameController.text}",
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.bold,
+                        fontColor: Colors.white,
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      reusableText(
+                        content: emailController.text,
+                        fontSize: 15.0,
+                        fontColor: Colors.white70,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
                 ),
-              ),
-              fallback: (context) =>
-                  Center(child: const CircularProgressIndicator()),
+                const SizedBox(height: 20),
+                infoCard("Phone Number", phoneController.text, Icons.phone),
+                infoCard("Gender", genderController.text, Icons.person),
+                infoCard("Date of Birth", dobController.text, Icons.cake),
+                const SizedBox(height: 10.0),
+                GestureDetector(
+                  onTap: () {
+                    _showEditProfile(context);
+                  },
+                  child: Container(
+                    width: Constant.screenWidth / 2,
+                    height: 50.0,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.teal.shade700,
+                          Constant.scaffoldColor,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(76),
+                          blurRadius: 10,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.edit, color: Colors.white),
+                        const SizedBox(width: 10.0),
+                        reusableText(
+                          content: 'Edit Profile',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.0,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
+            fallback: (context) =>
+                Center(child: const CircularProgressIndicator()),
           ),
         ),
       ),

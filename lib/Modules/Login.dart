@@ -15,15 +15,15 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  bool _isPasswordHide = true;
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  bool isPasswordHide = true;
+  final formKey = GlobalKey<FormState>();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
     super.dispose();
   }
 
@@ -54,7 +54,6 @@ class _LoginState extends State<Login> {
         }
       },
       builder: (context, state) {
-        var manager = Manager.get(context);
         return Scaffold(
           backgroundColor: Constant.scaffoldColor,
           resizeToAvoidBottomInset: false,
@@ -133,21 +132,21 @@ class _LoginState extends State<Login> {
                             vertical: 30,
                           ),
                           child: Form(
-                            key: _formKey,
+                            key: formKey,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 reusableTextFormField(
                                   hint: 'Email Address',
                                   prefixIcon: const Icon(Icons.email_outlined),
-                                  controller: _emailController,
+                                  controller: emailController,
                                   textInputType: TextInputType.emailAddress,
                                   radius: 15,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return 'email is required';
                                     } else if (!RegExp(
-                                      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$',
+                                      Constant.emailRegex,
                                     ).hasMatch(value)) {
                                       return 'invalid email format';
                                     }
@@ -158,14 +157,14 @@ class _LoginState extends State<Login> {
                                 reusableTextFormField(
                                   hint: 'Password',
                                   prefixIcon: const Icon(Icons.lock_outline),
-                                  controller: _passwordController,
-                                  obscureText: _isPasswordHide,
-                                  suffixIcon: _isPasswordHide
+                                  controller: passwordController,
+                                  obscureText: isPasswordHide,
+                                  suffixIcon: isPasswordHide
                                       ? Icons.visibility
                                       : Icons.visibility_off,
                                   suffixIconFunction: () {
                                     setState(() {
-                                      _isPasswordHide = !_isPasswordHide;
+                                      isPasswordHide = !isPasswordHide;
                                     });
                                   },
                                   textInputAction: TextInputAction.done,
@@ -178,7 +177,7 @@ class _LoginState extends State<Login> {
                                       return 'must be at least 8 characters';
                                     }
                                     if (!RegExp(
-                                      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$&*])\S{8,}$',
+                                      Constant.passwordRegex,
                                     ).hasMatch(value)) {
                                       return 'Password must contain 1 uppercase, 1 lowercase, 1 digit and 1 special char';
                                     }
@@ -212,10 +211,10 @@ class _LoginState extends State<Login> {
                                   condition: state is! LoadingState,
                                   builder: (context) => GestureDetector(
                                     onTap: () {
-                                      if (_formKey.currentState!.validate()) {
-                                        manager.login({
-                                          'email': _emailController.text,
-                                          'password': _passwordController.text,
+                                      if (formKey.currentState!.validate()) {
+                                        Manager.get(context).login({
+                                          'email': emailController.text,
+                                          'password': passwordController.text,
                                         });
                                       }
                                     },

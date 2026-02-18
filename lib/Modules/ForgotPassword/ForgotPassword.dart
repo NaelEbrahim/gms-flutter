@@ -6,30 +6,27 @@ import 'package:gms_flutter/BLoC/States.dart';
 import 'package:gms_flutter/Shared/Components.dart';
 import 'package:gms_flutter/Shared/Constant.dart';
 
-import 'VerifyCode.dart';
+class ForgotPassword extends StatefulWidget {
+  const ForgotPassword({super.key});
 
-final _forgotFormKey = GlobalKey<FormState>();
-final _forgotEmailController = TextEditingController();
+  @override
+  State<ForgotPassword> createState() => _ForgotPasswordState();
+}
 
-class ForgotPassword extends StatelessWidget {
+class _ForgotPasswordState extends State<ForgotPassword> {
+  final forgotFormKey = GlobalKey<FormState>();
+  TextEditingController forgotEmailController = TextEditingController();
+
+  @override
+  void dispose() {
+    forgotEmailController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {
-        // success
-        if (state is SuccessState) {
-          ReusableComponents.showToast(
-            Manager.get(context).message.toString(),
-            background: Colors.green,
-          );
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VerifyCode(_forgotEmailController.text),
-            ),
-            (route) => false,
-          );
-        }
         // error
         if (state is ErrorState) {
           ReusableComponents.showToast(
@@ -39,33 +36,29 @@ class ForgotPassword extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        var manager = Manager.get(context);
         return Scaffold(
           backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
+            foregroundColor: Colors.white,
             backgroundColor: Constant.scaffoldColor,
             elevation: 0,
             centerTitle: true,
             title: reusableText(
               content: "Forgot Password",
-              fontColor: Colors.teal.shade700,
+              fontColor: Colors.teal,
               fontWeight: FontWeight.bold,
               fontSize: 22,
             ),
           ),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(15.0),
+            padding: const EdgeInsets.all(10.0),
             child: Column(
               children: [
-                Icon(
-                  Icons.lock_reset,
-                  size: 100,
-                  color: Colors.teal.shade700,
-                ),
+                Icon(Icons.lock_reset, size: 100, color: Colors.teal),
                 const SizedBox(height: 20),
                 reusableText(
                   content: "Step 1 of 3",
-                  fontColor: Colors.teal.shade700,
+                  fontColor: Colors.teal,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -78,9 +71,8 @@ class ForgotPassword extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 30),
-                // Card Input
                 Form(
-                  key: _forgotFormKey,
+                  key: forgotFormKey,
                   child: Card(
                     color: Constant.scaffoldColor,
                     elevation: 6,
@@ -90,19 +82,16 @@ class ForgotPassword extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: reusableTextFormField(
-                        controller: _forgotEmailController,
+                        controller: forgotEmailController,
                         hint: "example@gmail.com",
-                        prefixIcon: Icon(
-                          Icons.email,
-                          color: Colors.teal.shade700,
-                        ),
+                        prefixIcon: Icon(Icons.email, color: Colors.teal),
                         textInputType: TextInputType.emailAddress,
                         radius: 12,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'email is required';
                           } else if (!RegExp(
-                            r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$',
+                            Constant.emailRegex,
                           ).hasMatch(value)) {
                             return 'invalid email format';
                           }
@@ -113,22 +102,21 @@ class ForgotPassword extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 40),
-                // Button
                 ConditionalBuilder(
                   condition: state is! LoadingState,
                   builder: (context) => GestureDetector(
                     onTap: () {
-                      if (_forgotFormKey.currentState!.validate()) {
-                        manager.forgotPassword({
-                          'email': _forgotEmailController.text,
-                        });
+                      if (forgotFormKey.currentState!.validate()) {
+                        Manager.get(
+                          context,
+                        ).forgotPassword({'email': forgotEmailController.text});
                       }
                     },
                     child: Container(
-                      width: double.infinity,
+                      width: Constant.screenWidth / 2,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: Colors.teal.shade700,
+                        color: Colors.teal,
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Center(

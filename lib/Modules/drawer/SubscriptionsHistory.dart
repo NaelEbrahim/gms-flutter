@@ -7,13 +7,31 @@ import 'package:gms_flutter/Shared/Constant.dart';
 
 import '../../Shared/Components.dart';
 
-class SubscriptionHistory extends StatelessWidget {
+class SubscriptionHistory extends StatefulWidget {
   const SubscriptionHistory({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    var manager = Manager.get(context);
+  State<SubscriptionHistory> createState() => _SubscriptionHistoryState();
+}
+
+class _SubscriptionHistoryState extends State<SubscriptionHistory> {
+  late Manager manager;
+
+  @override
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
     manager.getUserSubscriptionsHistory();
+  }
+
+  @override
+  void dispose() {
+    manager.userSubscriptionsHistory.clear();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {
         if (state is ErrorState) {
@@ -24,7 +42,6 @@ class SubscriptionHistory extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        var history = manager.userSubscriptionsHistory;
         return Scaffold(
           backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
@@ -44,7 +61,7 @@ class SubscriptionHistory extends StatelessWidget {
             child: ConditionalBuilder(
               condition: state is! LoadingState,
               builder: (context) {
-                if (history.isEmpty) {
+                if (manager.userSubscriptionsHistory.isEmpty) {
                   return const Center(
                     child: Text(
                       "No subscriptions yet.",
@@ -54,9 +71,9 @@ class SubscriptionHistory extends StatelessWidget {
                   );
                 } else {
                   return ListView.builder(
-                    itemCount: history.length,
+                    itemCount: manager.userSubscriptionsHistory.length,
                     itemBuilder: (context, index) {
-                      final item = history[index];
+                      final item = manager.userSubscriptionsHistory[index];
                       return Container(
                         margin: const EdgeInsets.only(bottom: 16),
                         decoration: BoxDecoration(
@@ -126,7 +143,7 @@ class SubscriptionHistory extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    "Price / Month: ${item.aClass.price} SYP",
+                                    "Price / Month: ${item.aClass.price} USD",
                                     style: const TextStyle(
                                       fontSize: 15,
                                       color: Colors.white,

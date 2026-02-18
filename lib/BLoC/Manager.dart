@@ -19,13 +19,14 @@ import 'package:gms_flutter/Models/ClassesModel.dart';
 import 'package:gms_flutter/Models/ProgramModel.dart';
 import 'package:gms_flutter/Models/SessionsModel.dart';
 import 'package:gms_flutter/Models/WorkoutProgressModel.dart';
+import 'package:gms_flutter/Modules/ForgotPassword/ResetPassword.dart';
+import 'package:gms_flutter/Modules/ForgotPassword/VerifyCode.dart';
 import 'package:gms_flutter/Remote/Dio_Linker.dart';
 import 'package:gms_flutter/Remote/End_Points.dart';
 import 'package:gms_flutter/Shared/Components.dart';
 import 'package:gms_flutter/Shared/SecureStorage.dart';
 import 'package:gms_flutter/Shared/SharedPrefHelper.dart';
 import 'package:gms_flutter/main.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../Modules/Base.dart';
 import '../Modules/Login.dart';
@@ -50,8 +51,9 @@ class Manager extends Cubit<BLoCStates> {
           await TokenStorage.writeAccessToken(loginModel.accessToken);
           await TokenStorage.writeRefreshToken(loginModel.refreshToken);
           emit(SuccessState());
-          MyApp.navigatorKey.currentState?.pushReplacement(
+          MyApp.navigatorKey.currentState?.pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => Base()),
+            (route) => false,
           );
         })
         .catchError((error) {
@@ -81,11 +83,13 @@ class Manager extends Cubit<BLoCStates> {
       final navigator = MyApp.navigatorKey.currentState;
       if (navigator != null) {
         ReusableComponents.showToast(
-          'Your session expired. Please log in again to continue.',
+          'login Required to continue',
           background: Colors.red,
         );
-        // navigate
-        navigator.pushReplacement(MaterialPageRoute(builder: (_) => Login()));
+        navigator.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => Login()),
+          (route) => false,
+        );
       }
     });
   }
@@ -96,8 +100,17 @@ class Manager extends Cubit<BLoCStates> {
     emit(LoadingState());
     Dio_Linker.postData(url: FORGOTPASSWORD, data: data)
         .then((value) {
-          message = value.data['message'];
           emit(SuccessState());
+          final navigator = MyApp.navigatorKey.currentState;
+          if (navigator != null) {
+            ReusableComponents.showToast(
+              'verification code was sent to: ${data['email']}',
+              background: Colors.green,
+            );
+            navigator.pushReplacement(
+              MaterialPageRoute(builder: (_) => VerifyCode(data['email'])),
+            );
+          }
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -109,8 +122,17 @@ class Manager extends Cubit<BLoCStates> {
     emit(LoadingState());
     Dio_Linker.postData(url: VERIFYCODE, data: data)
         .then((value) {
-          message = value.data['message'];
           emit(SuccessState());
+          final navigator = MyApp.navigatorKey.currentState;
+          if (navigator != null) {
+            ReusableComponents.showToast(
+              'code verified',
+              background: Colors.green,
+            );
+            navigator.pushReplacement(
+              MaterialPageRoute(builder: (_) => ResetPassword(data['email'])),
+            );
+          }
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -122,8 +144,18 @@ class Manager extends Cubit<BLoCStates> {
     emit(LoadingState());
     Dio_Linker.putData(url: RESETFORGOTPASSWORD, data: data)
         .then((value) {
-          message = value.data['message'];
           emit(SuccessState());
+          final navigator = MyApp.navigatorKey.currentState;
+          if (navigator != null) {
+            ReusableComponents.showToast(
+              'password updated',
+              background: Colors.green,
+            );
+            navigator.pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => Login()),
+              (route) => false,
+            );
+          }
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -133,16 +165,27 @@ class Manager extends Cubit<BLoCStates> {
 
   String handleDioError(dynamic error) {
     if (error is DioException) {
+      // Timeouts
       if (error.type == DioExceptionType.connectionTimeout ||
           error.type == DioExceptionType.receiveTimeout ||
           error.type == DioExceptionType.sendTimeout) {
-        return 'Request Timeout, try again';
+        return 'Request timeout, try again';
       }
-      if (error.response?.data?['message'] != null) {
-        return error.response!.data['message'].toString();
+      final response = error.response;
+      if (response != null) {
+        final data = response.data;
+        // message: String
+        if (data is Map && data['message'] != null) {
+          return data['message'].toString();
+        }
+        if (data is Map) {
+          return data.values.join('\n');
+        }
+        return 'Error code (${response.statusCode})';
       }
+      // Network issue
       if (error.type == DioExceptionType.connectionError) {
-        return 'No internet connection or server unreachable.';
+        return 'No internet connection or server unreachable';
       }
     }
     return 'Unexpected error, try again later';
@@ -300,7 +343,8 @@ class Manager extends Cubit<BLoCStates> {
   }
 
   void changeAppNotification() async {
-    final appNotifications = !(SharedPrefHelper.getBool('appNotifications') ?? true);
+    final appNotifications =
+        !(SharedPrefHelper.getBool('appNotifications') ?? true);
     await SharedPrefHelper.saveBool('appNotifications', appNotifications);
     emit(UpdateNewState());
   }
@@ -316,9 +360,13 @@ class Manager extends Cubit<BLoCStates> {
               'password Updated',
               background: Colors.green,
             );
+            navigator.pushReplacement(
+              MaterialPageRoute(builder: (context) => Base()),
+            );
           }
         })
         .catchError((error) {
+      print(error);
           String errorMessage = handleDioError(error);
           emit(ErrorState(errorMessage));
         });
