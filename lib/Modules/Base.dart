@@ -39,7 +39,15 @@ class _BaseState extends State<Base> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<Manager, BLoCStates>(
-      listener: (context, st5ate) {},
+      listener: (context, state) {
+        // error
+        if (state is ErrorState) {
+          ReusableComponents.showToast(
+            state.error.toString(),
+            background: Colors.red,
+          );
+        }
+      },
       builder: (context, state) {
         return Scaffold(
           key: _scaffoldKey,

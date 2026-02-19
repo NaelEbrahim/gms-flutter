@@ -3,8 +3,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gms_flutter/Modules/Base.dart';
-import 'package:gms_flutter/Modules/ForgotPassword/ForgotPassword.dart';
-import 'package:gms_flutter/Modules/ForgotPassword/VerifyCode.dart';
 import 'package:gms_flutter/Remote/Dio_Linker.dart';
 import 'package:gms_flutter/Remote/FCM.dart';
 import 'package:gms_flutter/Shared/Constant.dart';

@@ -15,15 +15,6 @@ class ArticlesModel {
     required this.articles,
   });
 
-  static final List<String> articleCategories = [
-    'All',
-    'Health',
-    'Sport',
-    'Food',
-    'Fitness',
-    'Supplements',
-  ];
-
   factory ArticlesModel.fromJson(Map<String, dynamic> json) {
     return ArticlesModel(
       count: json['count'] ?? 0,

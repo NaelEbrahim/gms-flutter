@@ -40,6 +40,8 @@ class Manager extends Cubit<BLoCStates> {
     emit(UpdateNewState());
   }
 
+  final int paginationSize = 5;
+
   late Login_Model loginModel;
 
   void login(Map<String, dynamic> data) {
@@ -366,32 +368,40 @@ class Manager extends Cubit<BLoCStates> {
           }
         })
         .catchError((error) {
-      print(error);
+          print(error);
           String errorMessage = handleDioError(error);
           emit(ErrorState(errorMessage));
         });
   }
 
-  ArticlesModel? articles;
+  ArticlesModel articles = ArticlesModel(
+    count: 0,
+    totalPages: 0,
+    currentPage: 0,
+    articles: [],
+  );
 
-  void getArticles({required Map<String, dynamic> data}) {
-    emit(LoadingState());
-    Dio_Linker.getData(url: GETARTICLES, params: data)
+  Future<void> getArticles(int page, String wikiType) async {
+    if (page == 0) {
+      emit(LoadingState());
+    }
+    return Dio_Linker.getData(
+          url: GETARTICLES,
+          params: {'page': page, 'size': paginationSize, 'wiki': wikiType},
+        )
         .then((value) {
-          articles = ArticlesModel.fromJson(value.data);
+          final newData = ArticlesModel.fromJson(value.data['message']);
+          if (page == 0) {
+            articles = newData;
+          } else {
+            articles.articles.addAll(newData.articles);
+          }
           emit(SuccessState());
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
           emit(ErrorState(errorMessage));
         });
-  }
-
-  double readProgress = 0;
-
-  void UpdateProgressEvent(double newProgress) {
-    readProgress = newProgress;
-    updateState();
   }
 
   void updateProfile(Map<String, dynamic> data) {
