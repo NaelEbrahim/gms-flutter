@@ -8,17 +8,41 @@ import 'package:gms_flutter/Shared/Constant.dart';
 import '../../BLoC/Manager.dart';
 import '../../Shared/Components.dart';
 
-class FAQ extends StatelessWidget {
+class FAQ extends StatefulWidget {
   const FAQ({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    var manager = Manager.get(context);
+  State<FAQ> createState() => _FAQState();
+}
+
+class _FAQState extends State<FAQ> {
+  late Manager manager;
+
+  @override
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
     manager.getFAQs();
+  }
+
+  @override
+  void dispose() {
+    manager.faqList.clear();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return BlocConsumer<Manager, BLoCStates>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is ErrorState) {
+          ReusableComponents.showToast(
+            state.error.toString(),
+            background: Colors.red,
+          );
+        }
+      },
       builder: (context, state) {
-        var faqs = manager.faqList;
         return Scaffold(
           backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
@@ -36,13 +60,13 @@ class FAQ extends StatelessWidget {
           body: ConditionalBuilder(
             condition: state is! LoadingState,
             builder: (context) {
-              if (state is SuccessState || state is UpdateNewState) {
-                if (faqs.isNotEmpty) {
+              if (state is SuccessState) {
+                if (manager.faqList.isNotEmpty) {
                   return ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: faqs.length,
+                    padding: const EdgeInsets.all(10),
+                    itemCount: manager.faqList.length,
                     itemBuilder: (context, index) {
-                      final faq = faqs[index];
+                      final faq = manager.faqList[index];
                       return _buildFAQCard(
                         question: faq.question,
                         answer: faq.answer,
@@ -74,7 +98,6 @@ class FAQ extends StatelessWidget {
                       GestureDetector(
                         onTap: () {
                           manager.getFAQs();
-                          faqs = manager.faqList;
                         },
                         child: Container(
                           height: 50,
