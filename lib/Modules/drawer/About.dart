@@ -51,62 +51,64 @@ class _AboutState extends State<About> {
             centerTitle: true,
             elevation: 0,
           ),
-          body: ConditionalBuilder(
-            condition: state is! LoadingState,
-            builder: (context) {
-              var item = manager.aboutUsModel;
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    Column(
-                      children: [
-                        Image.asset(
-                          'images/logo.png',
-                          height: Constant.screenHeight / 4,
-                          width: Constant.screenHeight / 4,
-                          fit: BoxFit.contain,
-                        ),
-                        Text(
-                          item!.gymName,
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.teal,
+          body: SafeArea(
+            child: ConditionalBuilder(
+              condition: state is! LoadingState,
+              builder: (context) {
+                var item = manager.aboutUsModel;
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      Column(
+                        children: [
+                          Image.asset(
+                            'images/logo.png',
+                            height: Constant.screenHeight / 4,
+                            width: Constant.screenHeight / 4,
+                            fit: BoxFit.contain,
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          item.gymDescription,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.white70,
-                            height: 1.5,
+                          Text(
+                            item!.gymName,
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    _buildInfoCard(
-                      icon: FontAwesomeIcons.bullseye,
-                      title: "Our Mission",
-                      description: item.ourMission,
-                    ),
-                    const SizedBox(height: 20),
-                    _buildInfoCard(
-                      icon: FontAwesomeIcons.eye,
-                      title: "Our Vision",
-                      description: item.ourVision,
-                    ),
-                    const SizedBox(height: 28),
-                    _buildFollowUsCard(),
-                  ],
-                ),
-              );
-            },
-            fallback: (context) =>
-                Center(child: const CircularProgressIndicator()),
+                          const SizedBox(height: 6),
+                          Text(
+                            item.gymDescription,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.white70,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildInfoCard(
+                        icon: FontAwesomeIcons.bullseye,
+                        title: "Our Mission",
+                        description: item.ourMission,
+                      ),
+                      const SizedBox(height: 20),
+                      _buildInfoCard(
+                        icon: FontAwesomeIcons.eye,
+                        title: "Our Vision",
+                        description: item.ourVision,
+                      ),
+                      const SizedBox(height: 28),
+                      _buildFollowUsCard(),
+                    ],
+                  ),
+                );
+              },
+              fallback: (context) =>
+                  Center(child: const CircularProgressIndicator()),
+            ),
           ),
         );
       },

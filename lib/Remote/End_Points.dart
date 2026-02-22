@@ -42,7 +42,7 @@ const DELETEMESSAGE = 'chat/deleteMessage';
 
 const DELETECONVERSATION = 'chat/deleteConversation';
 
-const GETCOACHES = 'user/by-role';
+const GETUSERS = 'user/by-role';
 
 const UPDATECONVERSATIONLASTSEEN = 'chat/updateLastSeen';
 

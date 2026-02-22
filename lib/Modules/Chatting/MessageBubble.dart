@@ -13,6 +13,7 @@ class MessageBubble extends StatelessWidget {
   final bool isMe;
   final DateTime time;
   final MessageStatus? status;
+  final bool selectionMode;
 
   const MessageBubble({
     super.key,
@@ -21,6 +22,7 @@ class MessageBubble extends StatelessWidget {
     required this.isMe,
     required this.time,
     this.status,
+    required this.selectionMode,
   });
 
   @override
@@ -67,7 +69,9 @@ class MessageBubble extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: isMe ? Colors.teal.withAlpha(153) : coachColor.withAlpha(230),
+                color: isMe
+                    ? Colors.teal.withAlpha(153)
+                    : coachColor.withAlpha(230),
                 blurRadius: 3,
                 offset: const Offset(0, 2),
               ),
@@ -77,7 +81,7 @@ class MessageBubble extends StatelessWidget {
             children: [
               Padding(
                 padding: EdgeInsets.only(bottom: isImage ? 28.0 : 16.0),
-                child: _buildMessageItem(context,textColor,manager)
+                child: _buildMessageItem(context, textColor, manager),
               ),
               Positioned(
                 bottom: 0,
@@ -111,11 +115,7 @@ class MessageBubble extends StatelessWidget {
       case MessageStatus.sending:
         return const Icon(Icons.access_time, size: 14, color: Colors.white70);
       case MessageStatus.sent:
-        return const Icon(
-          Icons.done_all,
-          size: 14,
-          color: Colors.white70,
-        );
+        return const Icon(Icons.done_all, size: 14, color: Colors.white70);
       case MessageStatus.failed:
         return const Icon(
           Icons.error_outline,
@@ -125,10 +125,14 @@ class MessageBubble extends StatelessWidget {
     }
   }
 
-  Widget _buildMessageItem(BuildContext context,Color textColor,ChatManager manager) {
+  Widget _buildMessageItem(
+    BuildContext context,
+    Color textColor,
+    ChatManager manager,
+  ) {
     switch (type) {
       case "IMAGE":
-        return _buildImageMessage(context,manager);
+        return _buildImageMessage(context, manager);
       case "TEXT":
       default:
         return _buildTextMessage(textColor);
@@ -138,21 +142,17 @@ class MessageBubble extends StatelessWidget {
   Widget _buildTextMessage(Color textColor) {
     return Text(
       content,
-      style: TextStyle(
-        color: textColor,
-        fontSize: 15.0,
-        height: 1.3,
-      ),
+      style: TextStyle(color: textColor, fontSize: 15.0, height: 1.3),
     );
   }
 
-  Widget _buildImageMessage(BuildContext context,ChatManager manager) {
-    if (manager.chatSelectionMode){
+  Widget _buildImageMessage(BuildContext context, ChatManager manager) {
+    if (selectionMode) {
       return buildClipRRect();
     } else {
       return GestureDetector(
         onTap: () {
-          if (!manager.chatSelectionMode) {
+          if (!selectionMode) {
             showDialog(
               context: context,
               builder: (_) => Dialog(
@@ -162,20 +162,15 @@ class MessageBubble extends StatelessWidget {
                   children: [
                     Center(
                       child: PhotoView(
-                        imageProvider:
-                        content.startsWith('/data/')
+                        imageProvider: content.startsWith('/data/')
                             ? FileImage(File(content))
-                            : NetworkImage(
-                          Constant.mediaURL + content,
-                        )
-                        as ImageProvider,
+                            : NetworkImage(Constant.mediaURL + content)
+                                  as ImageProvider,
                         backgroundDecoration: const BoxDecoration(
                           color: Colors.black,
                         ),
-                        minScale:
-                        PhotoViewComputedScale.contained,
-                        maxScale:
-                        PhotoViewComputedScale.covered * 2.5,
+                        minScale: PhotoViewComputedScale.contained,
+                        maxScale: PhotoViewComputedScale.covered * 2.5,
                       ),
                     ),
                     Positioned(
@@ -201,34 +196,28 @@ class MessageBubble extends StatelessWidget {
     }
   }
 
-  Widget buildClipRRect () => ClipRRect(
+  Widget buildClipRRect() => ClipRRect(
     borderRadius: BorderRadius.circular(12),
-    child: content.startsWith('/data/') ? Image.file(
-      File(content),
-      width: 200,
-      height: 200,
-      fit: BoxFit.cover,
-    ) : Image.network(
-      // (length - 5) to remove '/api/' from baseURL
-      Constant.baseAppURL.substring(0,
-          Constant.baseAppURL.length - 5) + content,
-      width: 200,
-      height: 200,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          width: 200,
-          height: 200,
-          color: Colors.grey.shade300,
-          alignment: Alignment.center,
-          child: const Icon(
-            Icons.broken_image,
-            size: 50,
-            color: Colors.grey,
+    child: content.startsWith('/data/')
+        ? Image.file(File(content), width: 200, height: 200, fit: BoxFit.cover)
+        : Image.network(
+            Constant.mediaURL + content,
+            width: 200,
+            height: 200,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: 200,
+                height: 200,
+                color: Colors.grey.shade300,
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.broken_image,
+                  size: 50,
+                  color: Colors.grey,
+                ),
+              );
+            },
           ),
-        );
-      },
-    ),
   );
-
 }

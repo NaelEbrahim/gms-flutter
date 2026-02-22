@@ -11,7 +11,7 @@ class ClassInfo extends StatelessWidget {
   final String title;
   final String description;
   final String pricePerMonth;
-  final ProfileDataModel coach;
+  final UserModel coach;
 
   const ClassInfo({
     super.key,

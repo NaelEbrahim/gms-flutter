@@ -49,7 +49,9 @@ class Manager extends Cubit<BLoCStates> {
     Dio_Linker.postData(url: LOGIN, data: data)
         .then((value) async {
           loginModel = Login_Model.fromJson(value.data);
-          SharedPrefHelper.saveUserData(ProfileModel.fromJson(value.data).data);
+          SharedPrefHelper.saveUserData(
+            UserModel.fromJson(value.data['message']),
+          );
           await TokenStorage.writeAccessToken(loginModel.accessToken);
           await TokenStorage.writeRefreshToken(loginModel.refreshToken);
           emit(SuccessState());
@@ -132,7 +134,9 @@ class Manager extends Cubit<BLoCStates> {
               background: Colors.green,
             );
             navigator.pushReplacement(
-              MaterialPageRoute(builder: (_) => ResetPassword(data['email'])),
+              MaterialPageRoute(
+                builder: (_) => ResetPassword(data['email'], data['code']),
+              ),
             );
           }
         })
@@ -314,10 +318,13 @@ class Manager extends Cubit<BLoCStates> {
     emit(LoadingState());
     Dio_Linker.getData(url: USERPROFILE)
         .then((value) {
-          SharedPrefHelper.saveUserData(ProfileModel.fromJson(value.data).data);
+          SharedPrefHelper.saveUserData(
+            UserModel.fromJson(value.data['message']),
+          );
           emit(SuccessState());
         })
         .catchError((error) {
+          print(error);
           String errorMessage = handleDioError(error);
           emit(ErrorState(errorMessage));
         });

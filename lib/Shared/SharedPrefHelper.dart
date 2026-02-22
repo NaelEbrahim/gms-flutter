@@ -20,7 +20,7 @@ class SharedPrefHelper {
     await _prefs.setBool(key, value);
   }
 
-  static Future saveUserData(ProfileDataModel data) async {
+  static Future saveUserData(UserModel data) async {
     saveString('id', data.id.toString());
     saveString('firstName', data.firstName.toString());
     saveString('lastName', data.lastName.toString());

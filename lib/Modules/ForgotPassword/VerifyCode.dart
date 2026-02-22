@@ -44,6 +44,7 @@ class _VerifyCodeState extends State<VerifyCode> {
           appBar: AppBar(
             backgroundColor: Constant.scaffoldColor,
             elevation: 0,
+            foregroundColor: Colors.white,
             centerTitle: true,
             title: reusableText(
               content: "Verify Code",

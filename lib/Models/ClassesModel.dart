@@ -3,7 +3,7 @@ import 'dart:core';
 import 'package:gms_flutter/Models/ProfileModel.dart';
 
 class ClassesModel {
-  final ProfileDataModel coach;
+  final UserModel coach;
   final int? id;
   final String? name;
   final String? description;
@@ -38,7 +38,7 @@ class ClassesModel {
 
   factory ClassesModel.fromJson(Map<String, dynamic> json) {
     return ClassesModel(
-      coach: ProfileDataModel.fromJson(json['coach']),
+      coach: UserModel.fromJson(json['coach']),
       id: json['id'] as int?,
       name: json['name'] as String?,
       description: json['description'] as String?,

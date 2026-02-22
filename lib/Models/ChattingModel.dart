@@ -60,23 +60,17 @@ class ChatsModel {
 }
 
 class ChatModel {
-  final ProfileDataModel otherParticipant;
+  final UserModel otherParticipant;
   final List<Message> messages;
-  //Message lastMessage;
 
-  ChatModel({
-    required this.otherParticipant,
-    required this.messages,
-    //required this.lastMessage,
-  });
+  ChatModel({required this.otherParticipant, required this.messages});
 
   factory ChatModel.fromJson(Map<String, dynamic> json) {
     return ChatModel(
-      otherParticipant: ProfileDataModel.fromJson(json['otherParticipant']),
+      otherParticipant: UserModel.fromJson(json['otherParticipant']),
       messages: (json['messages'] as List)
           .map((msg) => Message.fromJson(msg))
           .toList(),
-      //lastMessage: Message.fromJson(json['lastMessage']),
     );
   }
 }
@@ -87,8 +81,8 @@ class Message {
   final String type;
   final DateTime date;
   final String conversationId;
-  final ProfileDataModel sender;
-  final ProfileDataModel receiver;
+  final UserModel sender;
+  final UserModel receiver;
   MessageStatus status;
   final String? tempId;
 
@@ -111,13 +105,13 @@ class Message {
       type: json['type'],
       date: DateTime.parse(json['date']),
       conversationId: json['conversationId'].toString(),
-      sender: ProfileDataModel.fromJson(json['sender']),
-      receiver: ProfileDataModel.fromJson(json['receiver']),
+      sender: UserModel.fromJson(json['sender']),
+      receiver: UserModel.fromJson(json['receiver']),
       status: MessageStatus.sent,
     );
   }
 
-  static List<Message> parseList(jsonList){
+  static List<Message> parseList(jsonList) {
     List<Message> messages = [];
     if (jsonList != null && (jsonList as List).isNotEmpty) {
       for (var element in jsonList) {
@@ -126,7 +120,6 @@ class Message {
       return messages;
     }
     return [];
-
   }
 }
 
@@ -159,8 +152,8 @@ class LiveMessageModel {
     return LiveMessageModel(
       conversationId: json['conversationId']?.toString() ?? '',
       senderId: json['senderId']?.toString() ?? '',
-      senderFirstName : json['senderFirstName']?.toString() ?? '',
-      senderLastName : json['senderLastName']?.toString() ?? '',
+      senderFirstName: json['senderFirstName']?.toString() ?? '',
+      senderLastName: json['senderLastName']?.toString() ?? '',
       senderProfileImage: json['senderProfileImage']?.toString() ?? '',
       receiverId: json['receiverId']?.toString() ?? '',
       messageId: json['messageId']?.toString() ?? '',
@@ -170,15 +163,24 @@ class LiveMessageModel {
     );
   }
 
-
   static Message convertLiveMessageToMessage(LiveMessageModel liveMessage) {
     return Message(
       id: int.parse(liveMessage.messageId),
       content: liveMessage.message,
       type: liveMessage.messageType,
       date: DateTime.parse(liveMessage.timeStamp),
-      sender: ProfileDataModel(id: int.parse(liveMessage.senderId),firstName: liveMessage.senderFirstName,lastName: liveMessage.senderLastName),
-      receiver: ProfileDataModel(id: int.parse(liveMessage.receiverId)),
+      sender: UserModel(
+        id: int.parse(liveMessage.senderId),
+        firstName: liveMessage.senderFirstName,
+        lastName: liveMessage.senderLastName,
+        dob: '',
+        email: '',
+        gender: '',
+        phoneNumber: '',
+        profileImagePath: '',
+        createdAt: '',
+      ),
+      receiver: UserModel.withId(int.parse(liveMessage.receiverId)),
       status: MessageStatus.sent,
       conversationId: liveMessage.conversationId,
     );

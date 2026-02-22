@@ -5,7 +5,7 @@ class SessionsModel {
   final String? title;
   final String? description;
   final int? classId;
-  final ProfileDataModel coach;
+  final UserModel coach;
   final double? rate;
   final List<SessionScheduleModel> days;
   final String? createdAt;
@@ -49,7 +49,7 @@ class SessionsModel {
       title: json['title'] as String?,
       description: json['description'] as String?,
       classId: json['classId'] as int?,
-      coach: ProfileDataModel.fromJson(json['coach']),
+      coach: UserModel.fromJson(json['coach']),
       rate: (json['rate'] as num?)?.toDouble(),
       days: (json['schedules'] as List)
           .map((e) => SessionScheduleModel.fromJson(e))

@@ -18,7 +18,7 @@ class Pusher_Linker {
         //
       },
       onAuthorizer: (channelName, socketId, options) async {
-        print("Authorizing: $channelName | socket: $socketId");
+        //
         try {
           final response = await Dio_Linker.postData(
             url: CHATAUTH,

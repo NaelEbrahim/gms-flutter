@@ -1,7 +1,7 @@
 import 'ProfileModel.dart';
 
 class PrivateCoachModel {
-  final ProfileDataModel coach;
+  final UserModel coach;
   final bool isActive;
   final String? startedAt;
   final double? rate;
@@ -15,7 +15,7 @@ class PrivateCoachModel {
 
   factory PrivateCoachModel.fromJson(Map<String, dynamic> json) {
     return PrivateCoachModel(
-      coach: ProfileDataModel.fromJson(json['item']),
+      coach: UserModel.fromJson(json['item']),
       isActive: json['isActive'] as bool,
       startedAt: json['startedAt'] as String?,
       rate: (json['rate'] as num?)?.toDouble(),

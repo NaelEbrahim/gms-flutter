@@ -9,8 +9,9 @@ import '../../Shared/Constant.dart';
 
 class ResetPassword extends StatefulWidget {
   final String email;
+  final String code;
 
-  const ResetPassword(this.email, {super.key});
+  const ResetPassword(this.email, this.code, {super.key});
 
   @override
   State<ResetPassword> createState() => _ResetPasswordState();
@@ -160,6 +161,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                         if (resetFormKey.currentState!.validate()) {
                           Manager.get(context).resetForgotPassword({
                             'email': widget.email,
+                            'code' : widget.code,
                             'newPassword': newPasswordController.text,
                           });
                         }

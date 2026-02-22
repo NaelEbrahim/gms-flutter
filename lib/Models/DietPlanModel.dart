@@ -2,7 +2,7 @@ import 'package:gms_flutter/Models/ProfileModel.dart';
 
 class DietPlanModel {
   final int? id;
-  final ProfileDataModel coach;
+  final UserModel coach;
   final String? title;
   final String? createdAt;
   final String? lastModifiedAt;
@@ -40,7 +40,7 @@ class DietPlanModel {
   factory DietPlanModel.fromJson(Map<String, dynamic> json) {
     return DietPlanModel(
       id: json['id'] as int?,
-      coach: ProfileDataModel.fromJson(json['coach']),
+      coach: UserModel.fromJson(json['coach']),
       title: json['title'] as String?,
       createdAt: json['createdAt'] as String?,
       lastModifiedAt: json['lastModifiedAt'] as String?,
