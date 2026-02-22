@@ -18,31 +18,23 @@ class ChatManager extends Cubit<BLoCStates> {
 
   static ChatManager get(BuildContext context) => BlocProvider.of(context);
 
-  void updateState() {
-    emit(UpdateNewState());
-  }
-
   void sendTextMessage(Map<String, dynamic> data) {
-    final receiverId = int.parse(data['receiverId']);
     // create temp Message
     Message tempMessage = Message(
       conversationId: '',
       type: 'TEXT',
       tempId: UniqueKey().toString(),
-      sender: ProfileDataModel(
-        id: int.tryParse(SharedPrefHelper.getString('id').toString()),
+      sender: UserModel.withId(
+        int.parse(SharedPrefHelper.getString('id').toString()),
       ),
-      receiver: ProfileDataModel(id: receiverId),
+      receiver: UserModel.withId(int.parse(data['receiverId'])),
       content: data['content'],
       date: DateTime.now(),
       status: MessageStatus.sending,
     );
     // add temp message Locally
     _updateConversationMessages(message: tempMessage);
-    Dio_Linker.postData(
-          url: SENDTEXTMESSAGE,
-          data: data,
-        )
+    Dio_Linker.postData(url: SENDTEXTMESSAGE, data: data)
         .then((value) {
           final sentMessage = Message.fromJson(value.data['message']);
           // remove temp Message Locally
@@ -70,10 +62,10 @@ class ChatManager extends Cubit<BLoCStates> {
       conversationId: '',
       type: 'IMAGE',
       tempId: UniqueKey().toString(),
-      sender: ProfileDataModel(
-        id: int.tryParse(SharedPrefHelper.getString('id').toString()),
+      sender: UserModel.withId(
+        int.parse(SharedPrefHelper.getString('id').toString()),
       ),
-      receiver: ProfileDataModel(id: receiverId),
+      receiver: UserModel.withId(receiverId),
       content: image.path,
       date: DateTime.now(),
       status: MessageStatus.sending,
@@ -85,10 +77,7 @@ class ChatManager extends Cubit<BLoCStates> {
       'receiverId': data['receiverId'],
       'messageType': data['messageType'],
     });
-    Dio_Linker.postData(
-          url: SENDFILEMESSAGE,
-          data: formData,
-        )
+    Dio_Linker.postData(url: SENDFILEMESSAGE, data: formData)
         .then((value) {
           final sentMessage = Message.fromJson(value.data['message']);
           // remove temp Message Locally
@@ -109,41 +98,29 @@ class ChatManager extends Cubit<BLoCStates> {
         });
   }
 
-  List<Message> userConversationMessages = [];
   String openConversationId = '-';
-  bool hasMoreMessages = true;
-  bool isLoadingMessages = false;
-  int currentChatPage = 0;
+  List<Message> userConversationMessages = [];
 
-  void getConversationsMessages(String conversationId) {
-    if (isLoadingMessages || !hasMoreMessages) return;
-    isLoadingMessages = true;
-    emit(LoadingState());
-    Dio_Linker.getData(
+  Future<void> getConversationsMessages(int page, String conversationId) async {
+    if (page == 0) {
+      emit(LoadingState());
+    }
+    return Dio_Linker.getData(
           url: GETMESSAGES,
-          params: {
-            'conversationId': conversationId,
-            'page': currentChatPage,
-            'size': 50,
-          },
+          params: {'conversationId': conversationId, 'page': page, 'size': 50},
         )
         .then((value) {
           final List<Message> newMessages = Message.parseList(
             value.data['message'],
           );
-          if (newMessages.isEmpty) {
-            hasMoreMessages = false;
-          } else {
-            userConversationMessages.addAll(
-              newMessages.where(
-                (msg) => !userConversationMessages.any(
-                  (existing) => existing.id == msg.id,
-                ),
+          userConversationMessages.addAll(
+            newMessages.where(
+              (msg) => !userConversationMessages.any(
+                (existing) => existing.id == msg.id,
               ),
-            );
-            userConversationMessages.sort((a, b) => b.date.compareTo(a.date));
-            currentChatPage++;
-          }
+            ),
+          );
+          userConversationMessages.sort((a, b) => b.date.compareTo(a.date));
           // marks all messages as read
           var currentConversationIndex = userConversations.indexWhere(
             (chat) => chat.id == conversationId,
@@ -157,16 +134,13 @@ class ChatManager extends Cubit<BLoCStates> {
           String errorMessage = handleDioError(error);
           emit(ErrorState(errorMessage));
         });
-    isLoadingMessages = false;
   }
 
   List<ConversationModel> userConversations = [];
 
   void getUserConversations() {
     emit(LoadingState());
-    Dio_Linker.getData(
-          url: GETUSERCHATS,
-        )
+    Dio_Linker.getData(url: GETUSERCHATS)
         .then((value) {
           userConversations = ConversationModel.parseList(
             value.data['message'],
@@ -190,17 +164,6 @@ class ChatManager extends Cubit<BLoCStates> {
     await Pusher_Linker.subscribeToUserChannel((message) {
       _handleIncomingMessage(message);
     });
-  }
-
-  void clearChatMessages() {
-    userConversationMessages.clear();
-    selectedMessages.clear();
-    hasMoreMessages = true;
-    isLoadingMessages = false;
-    emojiVisible = false;
-    chatSelectionMode = false;
-    openConversationId = '-';
-    currentChatPage = 0;
   }
 
   void clearConversations() async {
@@ -236,7 +199,7 @@ class ChatManager extends Cubit<BLoCStates> {
     }
     // Sort messages by date (newest first)
     userConversationMessages.sort((a, b) => b.date.compareTo(a.date));
-    emit(UpdateNewState());
+    emit(SuccessState());
   }
 
   void _updateConversationList(Message message, callBySender) {
@@ -261,8 +224,9 @@ class ChatManager extends Cubit<BLoCStates> {
       updatedChat = ConversationModel(
         id: message.conversationId,
         otherUserId: message.sender.id.toString(),
-        otherUserName: (callBySender) ? '${message.receiver.firstName.toString()} ${message.receiver.lastName.toString()}'
-        : '${message.sender.firstName.toString()} ${message.sender.lastName.toString()}',
+        otherUserName: (callBySender)
+            ? '${message.receiver.firstName.toString()} ${message.receiver.lastName.toString()}'
+            : '${message.sender.firstName.toString()} ${message.sender.lastName.toString()}',
         otherUserProfileImage: message.receiver.profileImagePath,
         lastMessage: message.content.toString(),
         lastMessageTime: message.date.toString(),
@@ -272,35 +236,14 @@ class ChatManager extends Cubit<BLoCStates> {
       openConversationId = message.conversationId;
       userConversations.insert(0, updatedChat);
     }
-    emit(UpdateNewState());
+    emit(SuccessState());
   }
 
-  bool emojiVisible = false;
-
-  void changeChatEmojiVisible() {
-    emojiVisible = !emojiVisible;
-    emit(UpdateNewState());
-  }
-
-  bool chatSelectionMode = false;
-  List<Message> selectedMessages = [];
-
-  void changeChatSelectionMode() {
-    chatSelectionMode = !chatSelectionMode;
-    emit(UpdateNewState());
-  }
-
-  void deleteMessage(Map<String, dynamic> data) {
+  Future<void> deleteMessage(Map<String, dynamic> data) async {
     emit(LoadingState());
-    Dio_Linker.deleteData(
-          url: DELETEMESSAGE,
-          data: data,
-        )
+    return Dio_Linker.deleteData(url: DELETEMESSAGE, data: data)
         .then((value) {
           for (int messageId in data['messageIds']) {
-            // close selection mode
-            selectedMessages.clear();
-            chatSelectionMode = false;
             // remove deleted messages from local list
             deleteMessageFromConversation(
               userConversationMessages.firstWhere(
@@ -336,10 +279,7 @@ class ChatManager extends Cubit<BLoCStates> {
 
   void deleteConversation(Map<String, dynamic> data) {
     emit(LoadingState());
-    Dio_Linker.deleteData(
-          url: DELETECONVERSATION,
-          data: data,
-        )
+    Dio_Linker.deleteData(url: DELETECONVERSATION, data: data)
         .then((value) {
           userConversations.removeWhere(
             (chat) => chat.id == data['conversationId'],
@@ -359,21 +299,18 @@ class ChatManager extends Cubit<BLoCStates> {
     );
   }
 
-  List<ProfileDataModel> coaches = [];
-  bool hasMoreCoaches = true;
-  bool isLoadingCoaches = false;
+  GetUsersModel coaches = GetUsersModel(
+    count: 0,
+    totalPages: 1,
+    currentPage: 0,
+    items: [],
+  );
 
   void getCoaches() {
-    if (isLoadingCoaches || !hasMoreCoaches) return;
-    isLoadingCoaches = true;
     emit(LoadingState());
-    Dio_Linker.getData(
-          url: GETCOACHES,
-          params: {'role': 'Coach'},
-        )
+    Dio_Linker.getData(url: GETUSERS, params: {'role': 'Coach'})
         .then((value) {
-          coaches = ProfileDataModel.parseList(value.data['message']);
-          isLoadingCoaches = false;
+          coaches = GetUsersModel.fromJson(value.data['message']);
           emit(SuccessState());
         })
         .catchError((error) {
@@ -384,16 +321,27 @@ class ChatManager extends Cubit<BLoCStates> {
 
   String handleDioError(dynamic error) {
     if (error is DioException) {
+      // Timeouts
       if (error.type == DioExceptionType.connectionTimeout ||
           error.type == DioExceptionType.receiveTimeout ||
           error.type == DioExceptionType.sendTimeout) {
-        return 'Request Timeout, try again';
+        return 'Request timeout, try again';
       }
-      if (error.response?.data?['message'] != null) {
-        return error.response!.data['message'].toString();
+      final response = error.response;
+      if (response != null) {
+        final data = response.data;
+        // message: String
+        if (data is Map && data['message'] != null) {
+          return data['message'].toString();
+        }
+        if (data is Map) {
+          return data.values.join('\n');
+        }
+        return 'Error code (${response.statusCode})';
       }
+      // Network issue
       if (error.type == DioExceptionType.connectionError) {
-        return 'No internet connection or server unreachable.';
+        return 'No internet connection or server unreachable';
       }
     }
     return 'Unexpected error, try again later';

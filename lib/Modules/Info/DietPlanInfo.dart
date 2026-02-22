@@ -7,7 +7,7 @@ import 'package:gms_flutter/Shared/Constant.dart';
 
 class DietPlanInfo extends StatelessWidget {
   final String title;
-  final ProfileDataModel coach;
+  final UserModel coach;
   final Map<String, DayMealsModel>? schedule;
 
   const DietPlanInfo({

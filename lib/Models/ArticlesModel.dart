@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:gms_flutter/Models/ProfileModel.dart';
 
 class ArticlesModel {
@@ -31,7 +29,7 @@ class ArticlesModel {
 
 class Article {
   final int id;
-  final ProfileDataModel admin;
+  final UserModel admin;
   final String title;
   final String content;
   final String wikiType;
@@ -53,7 +51,7 @@ class Article {
   factory Article.fromJson(Map<String, dynamic> json) {
     return Article(
       id: json['id'] ?? 0,
-      admin: ProfileDataModel.fromJson(json['admin']),
+      admin: UserModel.fromJson(json['admin']),
       title: json['title'] ?? '',
       content: json['content'] ?? '',
       wikiType: json['wikiType'] ?? '',

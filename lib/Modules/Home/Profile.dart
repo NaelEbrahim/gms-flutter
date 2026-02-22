@@ -285,142 +285,145 @@ class _ProfileState extends State<Profile> {
   void _showEditProfile(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       backgroundColor: Constant.scaffoldColor,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (dialogContext) => Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 24,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              reusableText(
-                content: 'Edit Profile',
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-              ),
-              const SizedBox(height: 20),
-              _buildTextField(
-                label: "First Name",
-                icon: Icons.person,
-                controller: firstNameController,
-              ),
-              _buildTextField(
-                label: "Last Name",
-                icon: Icons.badge_outlined,
-                controller: lastNameController,
-              ),
-              _buildTextField(
-                label: "Email",
-                icon: Icons.email_outlined,
-                controller: emailController,
-                textInputType: TextInputType.emailAddress,
-              ),
-              _buildTextField(
-                label: "Phone Number",
-                icon: Icons.phone,
-                controller: phoneController,
-                textInputType: TextInputType.phone,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: DropdownButtonFormField<String>(
-                  initialValue: genderController.text,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(
-                      Icons.male_outlined,
-                      color: Colors.greenAccent,
+      builder: (dialogContext) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                reusableText(
+                  content: 'Edit Profile',
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+                const SizedBox(height: 20),
+                _buildTextField(
+                  label: "First Name",
+                  icon: Icons.person,
+                  controller: firstNameController,
+                ),
+                _buildTextField(
+                  label: "Last Name",
+                  icon: Icons.badge_outlined,
+                  controller: lastNameController,
+                ),
+                _buildTextField(
+                  label: "Email",
+                  icon: Icons.email_outlined,
+                  controller: emailController,
+                  textInputType: TextInputType.emailAddress,
+                ),
+                _buildTextField(
+                  label: "Phone Number",
+                  icon: Icons.phone,
+                  controller: phoneController,
+                  textInputType: TextInputType.phone,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: DropdownButtonFormField<String>(
+                    initialValue: genderController.text,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(
+                        Icons.male_outlined,
+                        color: Colors.greenAccent,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: const BorderSide(color: Colors.white54),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                        borderSide: const BorderSide(color: Colors.greenAccent),
+                      ),
+                      filled: true,
+                      fillColor: Colors.black54,
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(color: Colors.white54),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(color: Colors.greenAccent),
-                    ),
-                    filled: true,
-                    fillColor: Colors.black54,
-                  ),
-                  dropdownColor: Colors.black87,
-                  items: ["Male", "Female"]
-                      .map(
-                        (g) => DropdownMenuItem(
-                          value: g,
-                          child: reusableText(
-                            content: g,
-                            fontColor: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15.0,
+                    dropdownColor: Colors.black87,
+                    items: ["Male", "Female"]
+                        .map(
+                          (g) => DropdownMenuItem(
+                            value: g,
+                            child: reusableText(
+                              content: g,
+                              fontColor: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15.0,
+                            ),
                           ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      genderController.text = value;
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        genderController.text = value;
+                      }
+                    },
+                  ),
+                ),
+                reusableTextFormField(
+                  hint: 'Date of Birth',
+                  prefixIcon: const Icon(Icons.calendar_month_outlined),
+                  controller: dobController,
+                  readOnly: true,
+                  radius: 12.0,
+                  onTap: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate:
+                          DateTime.tryParse(dobController.text) ?? DateTime(2000),
+                      firstDate: DateTime(1950),
+                      lastDate: DateTime.now(),
+                    );
+                    if (pickedDate != null) {
+                      dobController.text =
+                          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
                     }
                   },
                 ),
-              ),
-              reusableTextFormField(
-                hint: 'Date of Birth',
-                prefixIcon: const Icon(Icons.calendar_month_outlined),
-                controller: dobController,
-                readOnly: true,
-                radius: 12.0,
-                onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate:
-                        DateTime.tryParse(dobController.text) ?? DateTime(2000),
-                    firstDate: DateTime(1950),
-                    lastDate: DateTime.now(),
-                  );
-                  if (pickedDate != null) {
-                    dobController.text =
-                        "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-                  }
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 12,
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  onPressed: () {
+                    manager.updateProfile({
+                      'firstName': firstNameController.text,
+                      'lastName': lastNameController.text,
+                      'email': emailController.text,
+                      'phoneNumber': phoneController.text,
+                      'dob': dobController.text,
+                      'gender': genderController.text,
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: reusableText(
+                    content: 'Save',
+                    fontColor: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.0,
                   ),
                 ),
-                onPressed: () {
-                  manager.updateProfile({
-                    'firstName': firstNameController.text,
-                    'lastName': lastNameController.text,
-                    'email': emailController.text,
-                    'phoneNumber': phoneController.text,
-                    'dob': dobController.text,
-                    'gender': genderController.text,
-                  });
-                  Navigator.pop(context);
-                },
-                child: reusableText(
-                  content: 'Save',
-                  fontColor: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
