@@ -1,5 +1,6 @@
 import 'package:gms_flutter/Models/ClassesModel.dart';
 import 'package:gms_flutter/Models/LoginModel.dart';
+import 'package:gms_flutter/Shared/Components.dart';
 
 class SubscriptionsHistoryModel {
   int id;
@@ -21,7 +22,7 @@ class SubscriptionsHistoryModel {
   factory SubscriptionsHistoryModel.fromJson(Map<String, dynamic> json) {
     return SubscriptionsHistoryModel(
       id: json['id'],
-      paymentDate: json['paymentDate'],
+      paymentDate: ReusableComponents.formatDateTime(json['paymentDate']),
       paymentAmount: json['paymentAmount'],
       discountPercentage: json['discountPercentage'],
       user: User_Data.fromJson(json['user']),
@@ -29,13 +30,7 @@ class SubscriptionsHistoryModel {
     );
   }
 
-  static List<SubscriptionsHistoryModel> parseList(jsonList) {
-    List<SubscriptionsHistoryModel> result = [];
-    if (jsonList != null && (jsonList as List).isNotEmpty) {
-      for (var element in jsonList) {
-        result.add(SubscriptionsHistoryModel.fromJson(element));
-      }
-    }
-    return result;
+  static List<SubscriptionsHistoryModel> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => SubscriptionsHistoryModel.fromJson(e)).toList();
   }
 }

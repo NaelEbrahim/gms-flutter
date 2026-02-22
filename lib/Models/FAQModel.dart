@@ -22,14 +22,7 @@ class FAQModel {
     );
   }
 
-  static List<FAQModel> parseList(jsonList) {
-    List<FAQModel> results = [];
-    if (jsonList != null && (jsonList as List).isNotEmpty) {
-      for (var element in jsonList) {
-        results.add(FAQModel.fromJson(element));
-      }
-      return results;
-    }
-    return results;
+  static List<FAQModel> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => FAQModel.fromJson(e)).toList();
   }
 }

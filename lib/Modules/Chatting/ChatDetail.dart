@@ -56,9 +56,12 @@ class ChatDetail extends StatelessWidget {
                           child: ClipOval(
                             child:
                                 (chatInfo.otherUserProfileImage != null &&
-                                    chatInfo.otherUserProfileImage.toString() != 'null')
+                                    chatInfo.otherUserProfileImage.toString() !=
+                                        'null')
                                 ? Image.network(
-                                    Constant.mediaURL + chatInfo.otherUserProfileImage.toString(),
+                                    Constant.mediaURL +
+                                        chatInfo.otherUserProfileImage
+                                            .toString(),
                                     width: 60,
                                     height: 60,
                                     fit: BoxFit.cover,
@@ -511,7 +514,8 @@ class ChatDetail extends StatelessWidget {
                   });
                 },
                 title: "Delete messages?",
-                body: "Are you sure you want to delete these messages for everyone?",
+                body:
+                    "Are you sure you want to delete these messages for everyone?",
               );
             },
           ),

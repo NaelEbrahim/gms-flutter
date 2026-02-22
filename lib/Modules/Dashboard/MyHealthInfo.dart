@@ -11,27 +11,49 @@ import '../../BLoC/Manager.dart';
 import '../../Shared/Components.dart';
 import '../../Shared/Constant.dart';
 
-class MyHealthInfo extends StatelessWidget {
-  MyHealthInfo({super.key});
+class MyHealthInfo extends StatefulWidget {
+  const MyHealthInfo({super.key});
 
-  Manager? _manager;
+  @override
+  State<MyHealthInfo> createState() => _MyHealthInfoState();
+}
 
-  // Filters
-  String _startDate = '';
-  String _endDate = '';
-  final TextEditingController _startDateController = TextEditingController();
-  final TextEditingController _endDateController = TextEditingController();
-
-  // UI State
+class _MyHealthInfoState extends State<MyHealthInfo> {
+  late Manager manager;
   bool showCharts = true;
 
-  // Data
-  List<HealthInfoModel> _healthInfos = [];
+  String _startDate = '';
+  String _endDate = '';
+  TextEditingController startDateController = TextEditingController();
+  TextEditingController endDateController = TextEditingController();
+  TextEditingController w = TextEditingController();
+  TextEditingController h = TextEditingController();
+  TextEditingController waist = TextEditingController();
+  TextEditingController arm = TextEditingController();
+  TextEditingController thigh = TextEditingController();
+  TextEditingController notes = TextEditingController();
 
-  final Color cardBlack = const Color(0xff212121);
-  final Color panelBlack = const Color(0xff2a2a2a);
+  @override
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
+    manager.userHealthInfo();
+  }
 
-  // Pick date
+  @override
+  void dispose() {
+    manager.userHealthInfos.clear();
+    startDateController.dispose();
+    endDateController.dispose();
+    w.dispose();
+    h.dispose();
+    waist.dispose();
+    arm.dispose();
+    thigh.dispose();
+    notes.dispose();
+    super.dispose();
+  }
+
   Future<void> _selectDate(BuildContext context, bool isStart) async {
     final picked = await showDatePicker(
       context: context,
@@ -45,34 +67,28 @@ class MyHealthInfo extends StatelessWidget {
               primary: Colors.teal.shade700,
               onPrimary: Colors.white,
             ),
-            dialogTheme: DialogThemeData(backgroundColor: panelBlack),
           ),
           child: child!,
         );
       },
     );
-
     if (picked != null) {
       final formatted = DateFormat('yyyy-MM-dd').format(picked);
       if (isStart) {
         _startDate = formatted;
-        _startDateController.text = formatted;
+        startDateController.text = formatted;
       } else {
         _endDate = formatted;
-        _endDateController.text = formatted;
+        endDateController.text = formatted;
       }
-      _manager?.updateState();
       if (_startDate.isNotEmpty && _endDate.isNotEmpty) {
-        _manager?.userHealthInfo(startDate: _startDate, endDate: _endDate);
+        manager.userHealthInfo(startDate: _startDate, endDate: _endDate);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    _manager = Manager.get(context);
-    _manager?.userHealthInfo();
-
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {
         if (state is ErrorState) {
@@ -83,45 +99,35 @@ class MyHealthInfo extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        _healthInfos = _manager!.userHealthInfos;
-        return PopScope(
-          canPop: true,
-          onPopInvokedWithResult: (didPop, result) {
-            _manager!.userHealthInfos.clear();
-            showCharts = true;
-            _startDateController.clear();
-            _endDateController.clear();
-          },
-          child: Scaffold(
-            backgroundColor: cardBlack,
-            appBar: AppBar(
-              backgroundColor: Colors.black,
-              centerTitle: true,
-              elevation: 0,
-              iconTheme: const IconThemeData(color: Colors.white),
-              title: reusableText(
-                content: 'Health Metrics Dashboard',
-                fontColor: Colors.greenAccent,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+        return Scaffold(
+          backgroundColor: Constant.scaffoldColor,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            centerTitle: true,
+            elevation: 0,
+            iconTheme: const IconThemeData(color: Colors.white),
+            title: reusableText(
+              content: 'Health Metrics Dashboard',
+              fontColor: Colors.greenAccent,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
             ),
-            floatingActionButton: FloatingActionButton(
-              backgroundColor: Colors.teal.shade700,
-              child: const Icon(Icons.add, color: Colors.white),
-              onPressed: () => _openAddRecordDialog(context),
+          ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: Colors.teal.shade700,
+            child: const Icon(Icons.add, color: Colors.white),
+            onPressed: () => _openAddRecordDialog(context),
+          ),
+          body: ConditionalBuilder(
+            condition: state is! LoadingState,
+            builder: (_) => Column(
+              children: [
+                _buildToggleButtons(),
+                _buildFilterSection(context),
+                Expanded(child: _buildBodyByState(state, context)),
+              ],
             ),
-            body: ConditionalBuilder(
-              condition: state is! LoadingState,
-              builder: (_) => Column(
-                children: [
-                  _buildToggleButtons(),
-                  _buildFilterSection(context),
-                  Expanded(child: _buildBodyByState(state, context)),
-                ],
-              ),
-              fallback: (_) => const Center(child: CircularProgressIndicator()),
-            ),
+            fallback: (_) => const Center(child: CircularProgressIndicator()),
           ),
         );
       },
@@ -130,7 +136,7 @@ class MyHealthInfo extends StatelessWidget {
 
   Widget _buildBodyByState(BLoCStates state, BuildContext context) {
     if (state is SuccessState || state is UpdateNewState) {
-      if (_healthInfos.isEmpty) {
+      if (manager.userHealthInfos.isEmpty) {
         final msg = _startDate.isEmpty && _endDate.isEmpty
             ? "No health records found."
             : "No records found in this date range.";
@@ -162,7 +168,7 @@ class MyHealthInfo extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         GestureDetector(
-          onTap: () => _manager?.userHealthInfo(),
+          onTap: () => manager.userHealthInfo(),
           child: Container(
             height: 50,
             width: Constant.screenWidth / 3,
@@ -195,12 +201,14 @@ class MyHealthInfo extends StatelessWidget {
       child: Row(
         children: [
           _toggleButton("Charts", showCharts, () {
-            showCharts = true;
-            _manager?.updateState();
+            setState(() {
+              showCharts = true;
+            });
           }),
           _toggleButton("Records", !showCharts, () {
-            showCharts = false;
-            _manager?.updateState();
+            setState(() {
+              showCharts = false;
+            });
           }),
         ],
       ),
@@ -246,7 +254,7 @@ class MyHealthInfo extends StatelessWidget {
             child: _buildDateField(
               context,
               'Start Date',
-              _startDateController,
+              startDateController,
               true,
             ),
           ),
@@ -255,7 +263,7 @@ class MyHealthInfo extends StatelessWidget {
             child: _buildDateField(
               context,
               'End Date',
-              _endDateController,
+              endDateController,
               false,
             ),
           ),
@@ -302,7 +310,7 @@ class MyHealthInfo extends StatelessWidget {
           _chartCard(
             "Weight Progress",
             "Track your weight changes over time",
-            _buildWeightChart(_healthInfos),
+            _buildWeightChart(manager.userHealthInfos),
             Colors.teal.shade400,
             Colors.teal.shade900,
           ),
@@ -310,7 +318,7 @@ class MyHealthInfo extends StatelessWidget {
           _chartCard(
             "BMI Progress",
             "Monitor your body mass index trend",
-            _buildBMIChart(_healthInfos),
+            _buildBMIChart(manager.userHealthInfos),
             Colors.indigo.shade400,
             Colors.deepPurple.shade900,
           ),
@@ -331,11 +339,11 @@ class MyHealthInfo extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
-          colors: [start.withOpacity(.9), end.withOpacity(.8)],
+          colors: [start.withAlpha(229), end.withAlpha(204)],
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.4),
+            color: Colors.black.withAlpha(102),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -367,9 +375,9 @@ class MyHealthInfo extends StatelessWidget {
   Widget _buildRecordsView(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _healthInfos.length,
+      itemCount: manager.userHealthInfos.length,
       itemBuilder: (_, index) {
-        return _healthCard(_healthInfos[index], index, context);
+        return _healthCard(manager.userHealthInfos[index], index, context);
       },
     );
   }
@@ -435,7 +443,11 @@ class MyHealthInfo extends StatelessWidget {
               icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
               onPressed: () {
                 ReusableComponents.deleteDialog<Manager>(context, () async {
-                  _manager?.deleteHealthRecord(info.id.toString(),startDate: _startDate,endDate: _endDate);
+                  manager.deleteHealthRecord(
+                    info.id.toString(),
+                    startDate: _startDate,
+                    endDate: _endDate,
+                  );
                 });
               },
             ),
@@ -494,7 +506,7 @@ class MyHealthInfo extends StatelessWidget {
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.greenAccent.withOpacity(.2),
+              color: Colors.greenAccent.withAlpha(51),
             ),
             spots: infos
                 .asMap()
@@ -520,7 +532,7 @@ class MyHealthInfo extends StatelessWidget {
             dotData: const FlDotData(show: true),
             belowBarData: BarAreaData(
               show: true,
-              color: Colors.blueAccent.withOpacity(.2),
+              color: Colors.blueAccent.withAlpha(51),
             ),
             spots: infos
                 .asMap()
@@ -564,93 +576,68 @@ class MyHealthInfo extends StatelessWidget {
   }
 
   Future<void> _openAddRecordDialog(BuildContext context) async {
-    final w = TextEditingController();
-    final h = TextEditingController();
-    final waist = TextEditingController();
-    final arm = TextEditingController();
-    final thigh = TextEditingController();
-    final notes = TextEditingController();
-
+    w.clear();
+    h.clear();
+    waist.clear();
+    arm.clear();
+    thigh.clear();
+    notes.clear();
     await showDialog(
       context: context,
       builder: (dialogCtx) {
-        return BlocProvider.value(
-          value: Manager.get(context),
-          child: BlocBuilder<Manager, BLoCStates>(
-            builder: (_, state) {
-              return AlertDialog(
-                backgroundColor: const Color(0xff2b2b2b),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                title: const Text(
-                  'Add New Record',
-                  style: TextStyle(color: Colors.white),
-                ),
-                content: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _dialogTextField("Weight (kg)", w, required: true),
-                      _dialogTextField("Height (cm)", h, required: true),
-                      _dialogTextField("Waist (cm)", waist),
-                      _dialogTextField("Arm (cm)", arm),
-                      _dialogTextField("Thigh (cm)", thigh),
-                      _dialogTextField("Notes", notes, isNumber: false),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogCtx),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ),
-                  ConditionalBuilder(
-                    condition: state is! LoadingState,
-                    builder: (_) => ElevatedButton(
-                      onPressed: () {
-                        if (w.text.isEmpty || h.text.isEmpty) {
-                          ReusableComponents.showToast(
-                            'Height and weight are required',
-                            background: Colors.red,
-                          );
-                          return;
-                        }
-
-                        final data = {
-                          "userId": SharedPrefHelper.getString('id'),
-                          "weightKg": double.tryParse(w.text) ?? 0,
-                          "heightCm": double.tryParse(h.text) ?? 0,
-                          "waistCircumference": double.tryParse(waist.text),
-                          "armCircumference": double.tryParse(arm.text),
-                          "thighCircumference": double.tryParse(thigh.text),
-                          "notes": notes.text.isNotEmpty ? notes.text : null,
-                        };
-
-                        Manager.get(context).logHealthInfo(data).then((_) {
-                          ReusableComponents.showToast(
-                            'Record added successfully',
-                            background: Colors.green,
-                          );
-                          Navigator.pop(dialogCtx);
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal.shade700,
-                      ),
-                      child: const Text(
-                        'Add',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    fallback: (_) => const CircularProgressIndicator(),
-                  ),
-                ],
-              );
-            },
+        return AlertDialog(
+          backgroundColor: Constant.scaffoldColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
           ),
+          title: const Text(
+            'Add New Record',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                _dialogTextField("Weight (kg)", w, required: true),
+                _dialogTextField("Height (cm)", h, required: true),
+                _dialogTextField("Waist (cm)", waist),
+                _dialogTextField("Arm (cm)", arm),
+                _dialogTextField("Thigh (cm)", thigh),
+                _dialogTextField("Notes", notes, isNumber: false),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (w.text.isEmpty || h.text.isEmpty) {
+                  ReusableComponents.showToast(
+                    'Height and weight are required',
+                    background: Colors.red,
+                  );
+                  return;
+                }
+                final data = {
+                  "userId": SharedPrefHelper.getString('id'),
+                  "weightKg": double.tryParse(w.text) ?? 0,
+                  "heightCm": double.tryParse(h.text) ?? 0,
+                  "waistCircumference": double.tryParse(waist.text),
+                  "armCircumference": double.tryParse(arm.text),
+                  "thighCircumference": double.tryParse(thigh.text),
+                  "notes": notes.text.isNotEmpty ? notes.text : null,
+                };
+                manager.logHealthInfo(data);
+                Navigator.pop(dialogCtx);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal.shade700,
+              ),
+              child: const Text('Add', style: TextStyle(color: Colors.white)),
+            ),
+          ],
         );
       },
     );

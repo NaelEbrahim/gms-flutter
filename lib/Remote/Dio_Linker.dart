@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:gms_flutter/Remote/Interceptor.dart';
 import 'package:gms_flutter/Shared/Constant.dart';
+
 class Dio_Linker {
   static late Dio dio;
   static const Duration globalTimeout = Duration(seconds: 15);
@@ -20,7 +21,7 @@ class Dio_Linker {
   static Future<Response> postData({
     required String url,
     dynamic data,
-    Map<String,dynamic>? params,
+    Map<String, dynamic>? params,
   }) {
     Map<String, String> headers = {'Content-Type': 'application/json'};
     return dio.post(
@@ -33,7 +34,7 @@ class Dio_Linker {
   static Future<Response> putData({
     required String url,
     dynamic data,
-    Map<String,dynamic>? params,
+    Map<String, dynamic>? params,
   }) {
     Map<String, String> headers = {'Content-Type': 'application/json'};
     return dio.put(
@@ -47,7 +48,7 @@ class Dio_Linker {
   static Future<Response> deleteData({
     required String url,
     Map<String, dynamic>? data,
-    Map<String,dynamic>? params
+    Map<String, dynamic>? params,
   }) {
     Map<String, String> headers = {'Content-Type': 'application/json'};
     return dio.delete(
@@ -61,7 +62,7 @@ class Dio_Linker {
   static Future<Response> getData({
     required String url,
     Map<String, dynamic>? data,
-    Map<String,dynamic>? params
+    Map<String, dynamic>? params,
   }) {
     Map<String, String> headers = {'Content-Type': 'application/json'};
     return dio.get(

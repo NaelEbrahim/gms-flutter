@@ -7,15 +7,27 @@ import '../../../../BLoC/States.dart';
 import '../../../../Shared/Constant.dart';
 import '../../../../Shared/Components.dart';
 
-class ClassPrograms extends StatelessWidget {
+class ClassPrograms extends StatefulWidget {
   final String classId;
 
   const ClassPrograms({super.key, required this.classId});
 
   @override
+  State<ClassPrograms> createState() => _ClassProgramsState();
+}
+
+class _ClassProgramsState extends State<ClassPrograms> {
+  late Manager manager;
+
+  @override
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
+    manager.getClassPrograms(widget.classId);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final manager = Manager.get(context);
-    manager.getClassPrograms(classId);
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {
         if (state is ErrorState) {
@@ -79,7 +91,7 @@ class ClassPrograms extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProgramDays(program: program)
+            builder: (context) => ProgramDays(program: program),
           ),
         );
       },
@@ -132,7 +144,7 @@ class ClassPrograms extends StatelessWidget {
                     horizontal: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.greenAccent.withOpacity(0.15),
+                    color: Colors.greenAccent.withAlpha(38),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.greenAccent),
                   ),

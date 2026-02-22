@@ -8,40 +8,35 @@ import '../../BLoC/States.dart';
 import '../../Shared/Components.dart';
 import '../../Shared/Constant.dart';
 
-class About extends StatelessWidget {
-  About({super.key});
+class About extends StatefulWidget {
+  const About({super.key});
 
-  final List<Map<String, String>> teamMembers = [
-    {
-      "name": "Nael Ebrahim",
-      "role": "Lead Developer",
-      "image": "images/team1.jpg",
-    },
-    {
-      "name": "Sarah Lee",
-      "role": "UI/UX Designer",
-      "image": "images/team2.jpg",
-    },
-    {
-      "name": "John Smith",
-      "role": "Fitness Expert",
-      "image": "images/team3.jpg",
-    },
-    {
-      "name": "Emily Davis",
-      "role": "Nutritionist",
-      "image": "images/team4.jpg",
-    },
-  ];
+  @override
+  State<About> createState() => _AboutState();
+}
+
+class _AboutState extends State<About> {
+  late Manager manager;
+
+  @override
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
+    manager.getAboutUs();
+  }
 
   @override
   Widget build(BuildContext context) {
-    var manager = Manager.get(context);
-    manager.getAboutUs();
     return BlocConsumer<Manager, BLoCStates>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is ErrorState) {
+          ReusableComponents.showToast(
+            state.error.toString(),
+            background: Colors.red,
+          );
+        }
+      },
       builder: (context, state) {
-        var item = manager.aboutUsModel;
         return Scaffold(
           backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
@@ -57,29 +52,27 @@ class About extends StatelessWidget {
             elevation: 0,
           ),
           body: ConditionalBuilder(
-              condition: state is! LoadingState,
-              builder: (context) => SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+            condition: state is! LoadingState,
+            builder: (context) {
+              var item = manager.aboutUsModel;
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(10),
                 child: Column(
                   children: [
-                    // --- Header ---
                     Column(
                       children: [
-                        CircleAvatar(
-                          radius: 70,
-                          backgroundColor: Colors.teal.shade700,
-                          child: Image.asset(
-                            'images/logo_white.png',
-                            fit: BoxFit.contain,
-                          ),
+                        Image.asset(
+                          'images/logo.png',
+                          height: Constant.screenHeight / 4,
+                          width: Constant.screenHeight / 4,
+                          fit: BoxFit.contain,
                         ),
-                        const SizedBox(height: 12),
                         Text(
                           item!.gymName,
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
-                            color: Colors.greenAccent,
+                            color: Colors.teal,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -95,70 +88,31 @@ class About extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 24),
-
-                    // --- Mission & Vision ---
                     _buildInfoCard(
                       icon: FontAwesomeIcons.bullseye,
                       title: "Our Mission",
-                      description:
-                      item.ourMission,
+                      description: item.ourMission,
                     ),
                     const SizedBox(height: 20),
                     _buildInfoCard(
                       icon: FontAwesomeIcons.eye,
                       title: "Our Vision",
-                      description:
-                      item.ourVision,
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    // --- Team Section ---
-                    // Team Section
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Meet the Team",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.greenAccent,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    SizedBox(
-                      height: 160, // fixed height for horizontal cards
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: teamMembers.length,
-                        separatorBuilder: (context, _) => const SizedBox(width: 16),
-                        itemBuilder: (context, index) {
-                          final member = teamMembers[index];
-                          return _buildTeamMemberHorizontal(
-                            name: member['name']!,
-                            role: member['role']!,
-                            image: member['image']!,
-                          );
-                        },
-                      ),
+                      description: item.ourVision,
                     ),
                     const SizedBox(height: 28),
-
-                    // --- Follow Us ---
                     _buildFollowUsCard(),
                   ],
                 ),
-              ),
-              fallback: (context) => Center(child: const CircularProgressIndicator(),),
+              );
+            },
+            fallback: (context) =>
+                Center(child: const CircularProgressIndicator()),
           ),
         );
       },
     );
   }
 
-  // Info Card
   Widget _buildInfoCard({
     required IconData icon,
     required String title,
@@ -169,16 +123,16 @@ class About extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: Colors.black54,
-        border: Border.all(color: Colors.greenAccent.withOpacity(0.3)),
+        border: Border.all(color: Colors.teal.withAlpha(76)),
       ),
       child: Column(
         children: [
-          Icon(icon, color: Colors.greenAccent, size: 36),
+          Icon(icon, color: Colors.teal, size: 36),
           const SizedBox(height: 12),
           Text(
             title,
             style: const TextStyle(
-              color: Colors.greenAccent,
+              color: Colors.teal,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -194,62 +148,13 @@ class About extends StatelessWidget {
     );
   }
 
-  // Team Member Card (list item with FontAwesome icon)
-  Widget _buildTeamMemberHorizontal({
-    required String name,
-    required String role,
-    required String image,
-  }) {
-    return Container(
-      width: 140,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        color: Colors.black54,
-        border: Border.all(color: Colors.greenAccent.withOpacity(0.3)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(50),
-            child: Image.asset(
-              image,
-              width: 70,
-              height: 70,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.person, size: 70, color: Colors.greenAccent),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            name,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            role,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Follow Us Card
   Widget _buildFollowUsCard() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
-          colors: [Colors.teal.shade500, Constant.scaffoldColor],
+          colors: [Colors.teal, Constant.scaffoldColor],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

@@ -7,13 +7,26 @@ import 'package:gms_flutter/Modules/ForgotPassword/ForgotPassword.dart';
 import 'package:gms_flutter/Shared/Components.dart';
 import 'package:gms_flutter/Shared/Constant.dart';
 
-import 'Base.dart';
+class Login extends StatefulWidget {
+  const Login({super.key});
 
-final _formKey = GlobalKey<FormState>();
-final _emailController = TextEditingController();
-final _passwordController = TextEditingController();
+  @override
+  State<Login> createState() => _LoginState();
+}
 
-class Login extends StatelessWidget {
+class _LoginState extends State<Login> {
+  bool isPasswordHide = true;
+  final formKey = GlobalKey<FormState>();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -32,20 +45,6 @@ class Login extends StatelessWidget {
         : targetHeaderHeight;
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {
-        // success
-        if (state is SuccessState) {
-          ReusableComponents.showToast(
-            Manager.get(context).message.toString(),
-            background: Colors.green,
-          );
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Base()),
-            (route) => false,
-          );
-          _emailController.clear();
-          _passwordController.clear();
-        }
         // error
         if (state is ErrorState) {
           ReusableComponents.showToast(
@@ -55,7 +54,6 @@ class Login extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        var manager = Manager.get(context);
         return Scaffold(
           backgroundColor: Constant.scaffoldColor,
           resizeToAvoidBottomInset: false,
@@ -134,23 +132,21 @@ class Login extends StatelessWidget {
                             vertical: 30,
                           ),
                           child: Form(
-                            key: _formKey,
+                            key: formKey,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 reusableTextFormField(
                                   hint: 'Email Address',
-                                  prefixIcon: const Icon(
-                                    Icons.email_outlined,
-                                  ),
-                                  controller: _emailController,
+                                  prefixIcon: const Icon(Icons.email_outlined),
+                                  controller: emailController,
                                   textInputType: TextInputType.emailAddress,
                                   radius: 15,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return 'email is required';
                                     } else if (!RegExp(
-                                      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$',
+                                      Constant.emailRegex,
                                     ).hasMatch(value)) {
                                       return 'invalid email format';
                                     }
@@ -161,11 +157,15 @@ class Login extends StatelessWidget {
                                 reusableTextFormField(
                                   hint: 'Password',
                                   prefixIcon: const Icon(Icons.lock_outline),
-                                  controller: _passwordController,
-                                  obscureText: manager.eyeVisible,
-                                  suffixIcon: manager.eyeIcon,
+                                  controller: passwordController,
+                                  obscureText: isPasswordHide,
+                                  suffixIcon: isPasswordHide
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
                                   suffixIconFunction: () {
-                                    manager.togglePasswordVisibility();
+                                    setState(() {
+                                      isPasswordHide = !isPasswordHide;
+                                    });
                                   },
                                   textInputAction: TextInputAction.done,
                                   radius: 15,
@@ -177,7 +177,7 @@ class Login extends StatelessWidget {
                                       return 'must be at least 8 characters';
                                     }
                                     if (!RegExp(
-                                      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$&*])\S{8,}$',
+                                      Constant.passwordRegex,
                                     ).hasMatch(value)) {
                                       return 'Password must contain 1 uppercase, 1 lowercase, 1 digit and 1 special char';
                                     }
@@ -211,11 +211,10 @@ class Login extends StatelessWidget {
                                   condition: state is! LoadingState,
                                   builder: (context) => GestureDetector(
                                     onTap: () {
-                                      if (_formKey.currentState!.validate()) {
-                                        manager.login({
-                                          'email': _emailController.text,
-                                          'password':
-                                              _passwordController.text,
+                                      if (formKey.currentState!.validate()) {
+                                        Manager.get(context).login({
+                                          'email': emailController.text,
+                                          'password': passwordController.text,
                                         });
                                       }
                                     },
@@ -231,9 +230,7 @@ class Login extends StatelessWidget {
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
                                         ),
-                                        borderRadius: BorderRadius.circular(
-                                          15,
-                                        ),
+                                        borderRadius: BorderRadius.circular(15),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.green.shade700,
@@ -264,9 +261,7 @@ class Login extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: keyboardHeight > 0 ? keyboardHeight : 0,
-                      ),
+                      SizedBox(height: keyboardHeight > 0 ? keyboardHeight : 0),
                     ],
                   ),
                 );

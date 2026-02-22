@@ -1,36 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:gms_flutter/Models/ProfileModel.dart';
+import 'package:gms_flutter/Models/SessionsModel.dart';
 import 'package:gms_flutter/Shared/Components.dart';
+import 'package:gms_flutter/Shared/Constant.dart';
 
 class SessionInfo extends StatelessWidget {
-  final String title;
-  final ProfileDataModel coach;
-  final String className;
-  final String classImage;
-  final String description;
-  final String startTime;
-  final String endTime;
-  final int subscribers;
-  final List<String> schedule;
+  final SessionsModel sessionsModel;
 
-  const SessionInfo({
-    super.key,
-    required this.title,
-    required this.coach,
-    required this.className,
-    required this.classImage,
-    required this.description,
-    required this.startTime,
-    required this.endTime,
-    required this.subscribers,
-    required this.schedule,
-  });
+  const SessionInfo({super.key, required this.sessionsModel});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff212121),
+      backgroundColor: Constant.scaffoldColor,
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         title: reusableText(
@@ -47,75 +29,79 @@ class SessionInfo extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           _buildClassBanner(),
-
           const SizedBox(height: 20),
           _buildCoachCard(),
-
           const SizedBox(height: 16),
           _buildInfoCard(
             icon: FontAwesomeIcons.users,
             title: "Subscribers",
-            value: "$subscribers people joined",
+            value:
+                "${sessionsModel.subscribersCount} / ${sessionsModel.maxNumber}",
           ),
-
           const SizedBox(height: 16),
           _buildInfoCard(
             icon: FontAwesomeIcons.dumbbell,
             title: "Class",
-            value: className,
+            value: sessionsModel.className ?? 'none',
           ),
-
-          const SizedBox(height: 16),
-          _buildDescriptionCard(),
-
           const SizedBox(height: 16),
           _buildScheduleCard(),
+          const SizedBox(height: 16),
+          _buildDescriptionCard(),
         ],
       ),
     );
   }
 
   Widget _buildClassBanner() {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Image.asset(
-            'images/session.jpg',
-            height: 180,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              height: 180,
-              color: Colors.grey.shade800,
-              child: const Icon(
-                FontAwesomeIcons.dumbbell,
-                color: Colors.greenAccent,
-                size: 50,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Center(
+        child: Stack(
+          alignment: AlignmentGeometry.center,
+          children: [
+            (sessionsModel.classImage != null)
+                ? Image.network(
+                    Constant.mediaURL + sessionsModel.classImage.toString(),
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.fill,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.fitness_center, size: 100),
+                  )
+                : const Icon(Icons.image_not_supported_outlined, size: 100),
+            Container(
+              height: 200,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.black.withAlpha(155), Colors.transparent],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
               ),
             ),
-          ),
-        ),
-        Positioned(
-          bottom: 16,
-          left: 16,
-          child: Text(
-            title,
-            style: const TextStyle(
-              color: Colors.greenAccent,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              shadows: [
-                Shadow(
-                  color: Colors.black87,
-                  offset: Offset(1, 1),
-                  blurRadius: 6,
+            Positioned(
+              bottom: 16,
+              left: 16,
+              child: Text(
+                sessionsModel.title ?? 'none',
+                style: const TextStyle(
+                  color: Colors.greenAccent,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black87,
+                      offset: Offset(1, 1),
+                      blurRadius: 6,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -125,18 +111,28 @@ class SessionInfo extends StatelessWidget {
       decoration: _cardDecoration(),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(40),
-            child: Image.asset(
-              coach.profileImagePath.toString(),
-              width: 70,
-              height: 70,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                FontAwesomeIcons.userTie,
-                color: Colors.greenAccent,
-                size: 40,
-              ),
+          CircleAvatar(
+            radius: 32,
+            backgroundColor: Colors.teal.withAlpha(38),
+            child: ClipOval(
+              child: (sessionsModel.coach.profileImagePath != null)
+                  ? Image.network(
+                      Constant.mediaURL +
+                          sessionsModel.coach.profileImagePath.toString(),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.person,
+                        color: Colors.greenAccent,
+                        size: 40,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.person,
+                      color: Colors.greenAccent,
+                      size: 40,
+                    ),
             ),
           ),
           const SizedBox(width: 16),
@@ -162,7 +158,7 @@ class SessionInfo extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '${coach.firstName} ${coach.lastName}',
+                      '${sessionsModel.coach.firstName} ${sessionsModel.coach.lastName}',
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
@@ -243,7 +239,7 @@ class SessionInfo extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            description,
+            sessionsModel.description ?? '',
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
@@ -277,7 +273,7 @@ class SessionInfo extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          ...schedule.map((s) {
+          ...sessionsModel.days.map((s) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
@@ -289,7 +285,7 @@ class SessionInfo extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    "$s → $startTime - $endTime",
+                    "${s.day} → ${s.startTime} - ${s.endTime}",
                     style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],

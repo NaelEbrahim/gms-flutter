@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gms_flutter/Models/DietPlanModel.dart';
 import 'package:gms_flutter/Models/ProfileModel.dart';
 import 'package:gms_flutter/Shared/Components.dart';
-
+import 'package:gms_flutter/Shared/Constant.dart';
 
 class DietPlanInfo extends StatelessWidget {
   final String title;
@@ -36,9 +36,7 @@ class DietPlanInfo extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildHeader(),
-          const SizedBox(height: 16),
-          _buildCoachCard(),
+          _buildHeaderCoachCard(),
           const SizedBox(height: 20),
           _buildSchedule(),
         ],
@@ -46,60 +44,81 @@ class DietPlanInfo extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeaderCoachCard() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: _cardDecoration(),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(FontAwesomeIcons.appleWhole, color: Colors.greenAccent, size: 28),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.greenAccent,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+          Row(
+            children: [
+              const Icon(Icons.restaurant, color: Colors.greenAccent, size: 26),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.greenAccent,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCoachCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: _cardDecoration(),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(40),
-            child: Image.asset(
-              coach.profileImagePath.toString(),
-              width: 70,
-              height: 70,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                FontAwesomeIcons.user,
-                color: Colors.greenAccent,
-                size: 40,
+          const SizedBox(height: 16),
+          Container(height: 1, color: Colors.white12),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(40),
+                child: (coach.profileImagePath != null)
+                    ? Image.network(
+                        Constant.mediaURL + coach.profileImagePath.toString(),
+                        width: 64,
+                        height: 64,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const Icon(
+                          Icons.person,
+                          color: Colors.greenAccent,
+                          size: 36,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.person,
+                        size: 36,
+                        color: Colors.greenAccent,
+                      ),
               ),
-            ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Audit Coach',
+                      style: TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${coach.firstName} ${coach.lastName}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              'Coach ${coach.firstName} ${coach.lastName}',
-              style: const TextStyle(
-                color: Colors.greenAccent,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          )
         ],
       ),
     );
@@ -147,7 +166,6 @@ class DietPlanInfo extends StatelessWidget {
     );
   }
 
-
   Widget _buildMealCard(Map<String, dynamic> meal) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -161,19 +179,19 @@ class DietPlanInfo extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              meal["image"],
-              width: 70,
-              height: 70,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                width: 70,
-                height: 70,
-                color: Colors.grey.shade800,
-                child: const Icon(FontAwesomeIcons.utensils,
-                    color: Colors.greenAccent, size: 28),
-              ),
-            ),
+            child: (meal['image'] != null)
+                ? Image.network(
+                    Constant.mediaURL + meal['image'],
+                    width: 70,
+                    height: 70,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.restaurant,
+                      color: Colors.greenAccent,
+                      size: 30,
+                    ),
+                  )
+                : const Icon(Icons.restaurant, size: 30),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -183,9 +201,10 @@ class DietPlanInfo extends StatelessWidget {
                 Text(
                   meal["title"],
                   style: const TextStyle(
-                      color: Colors.greenAccent,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold),
+                    color: Colors.greenAccent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -231,4 +250,3 @@ class DietPlanInfo extends StatelessWidget {
     );
   }
 }
-

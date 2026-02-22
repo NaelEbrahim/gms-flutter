@@ -5,157 +5,135 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gms_flutter/BLoC/Manager.dart';
 import 'package:gms_flutter/BLoC/States.dart';
 import 'package:gms_flutter/Modules/ChangePassword.dart';
-import 'package:gms_flutter/Modules/Login.dart';
-import 'package:gms_flutter/Shared/Constant.dart';
+import 'package:gms_flutter/Modules/Home/Profile.dart';
 import 'package:gms_flutter/Shared/SharedPrefHelper.dart';
 
-import '../../Shared/Components.dart';
+class Settings extends StatefulWidget {
+  const Settings({super.key});
 
-class Settings extends StatelessWidget {
-  Settings({super.key});
+  @override
+  State<Settings> createState() => _SettingsState();
+}
 
-  Manager? _manager;
-
+class _SettingsState extends State<Settings> {
+  late Manager manager;
   final String appVersion = "1.0.0";
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: Manager.get(context),
-      child: BlocConsumer<Manager, BLoCStates>(
-        listener: (context, state) {},
-        builder: (context, state) {
-          _manager = Manager.get(context);
-          return Scaffold(
-            backgroundColor: Constant.scaffoldColor,
-            appBar: AppBar(
-              iconTheme: IconThemeData(color: Colors.white),
-              title: reusableText(
-                content: 'Settings',
-                fontSize: 22.0,
-                fontColor: Colors.greenAccent,
-                fontWeight: FontWeight.bold,
-              ),
-              backgroundColor: Colors.black,
-              centerTitle: true,
-              elevation: 0,
-            ),
-            body: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // Account Section
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.9, end: 1),
-                  duration: const Duration(milliseconds: 600),
-                  curve: Curves.easeOutBack,
-                  builder: (context, scale, child) =>
-                      Transform.scale(scale: scale, child: child),
-                  child: _buildSectionCard(
-                    title: "Account",
-                    icon: FontAwesomeIcons.user,
-                    children: [
-                      _buildOptionTile(
-                        icon: FontAwesomeIcons.userPen,
-                        title: "Edit Profile",
-                        onTap: () {},
-                      ),
-                      _buildOptionTile(
-                        icon: FontAwesomeIcons.key,
-                        title: "Change Password",
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChangePassword(),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.9, end: 1),
-                  duration: const Duration(milliseconds: 700),
-                  curve: Curves.easeOutBack,
-                  builder: (context, scale, child) =>
-                      Transform.scale(scale: scale, child: child),
-                  child: _buildSectionCard(
-                    title: "Preferences",
-                    icon: FontAwesomeIcons.sliders,
-                    children: [
-                      _buildToggleTile(
-                        icon: FontAwesomeIcons.moon,
-                        title: "Dark Mode",
-                        value: SharedPrefHelper.getBool('appTheme') ?? false,
-                        onChanged: (val) {
-                          _manager!.changeAppTheme();
-                          _manager!.updateState();
-                        },
-                      ),
-                      _buildToggleTile(
-                        icon: FontAwesomeIcons.bell,
-                        title: "Notifications",
-                        value:
-                            SharedPrefHelper.getBool('appNotifications') ??
-                            false,
-                        onChanged: (val) {
-                          _manager!.changeAppNotification();
-                          _manager!.updateState();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
+  }
 
-                // About Section
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.9, end: 1),
-                  duration: const Duration(milliseconds: 800),
-                  curve: Curves.easeOutBack,
-                  builder: (context, scale, child) =>
-                      Transform.scale(scale: scale, child: child),
-                  child: _buildSectionCard(
-                    title: "About",
-                    icon: FontAwesomeIcons.infoCircle,
-                    children: [
-                      _buildOptionTile(
-                        icon: FontAwesomeIcons.fileCircleQuestion,
-                        title: "FAQ",
-                        onTap: () {},
-                      ),
-                      _buildAppVersionTile(),
-                    ],
-                  ),
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<Manager, BLoCStates>(
+      listener: (context, state) {},
+      builder: (context, state) => ListView(
+        children: [
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.9, end: 1),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutBack,
+            builder: (context, scale, child) =>
+                Transform.scale(scale: scale, child: child),
+            child: _buildSectionCard(
+              title: "Account",
+              icon: FontAwesomeIcons.user,
+              children: [
+                _buildOptionTile(
+                  icon: FontAwesomeIcons.userPen,
+                  title: "Edit Profile",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Profile()),
+                    );
+                  },
                 ),
-                const SizedBox(height: 24),
-                // Logout Button
-                ConditionalBuilder(
-                  condition: state is! LoadingState,
-                  builder: (context) => ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    icon: const Icon(FontAwesomeIcons.rightFromBracket),
-                    label: const Text("Logout", style: TextStyle(fontSize: 16)),
-                    onPressed: () {
-                      _manager!.logout();
-                    },
-                  ),
-                  fallback: (context) =>
-                      Center(child: const CircularProgressIndicator()),
+                _buildOptionTile(
+                  icon: FontAwesomeIcons.key,
+                  title: "Change Password",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ChangePassword()),
+                    );
+                  },
                 ),
               ],
             ),
-          );
-        },
+          ),
+          const SizedBox(height: 16),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.9, end: 1),
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeOutBack,
+            builder: (context, scale, child) =>
+                Transform.scale(scale: scale, child: child),
+            child: _buildSectionCard(
+              title: "Preferences",
+              icon: FontAwesomeIcons.sliders,
+              children: [
+                _buildToggleTile(
+                  icon: FontAwesomeIcons.moon,
+                  title: "Dark Mode",
+                  value: SharedPrefHelper.getBool('appTheme') ?? true,
+                  onChanged: (val) {
+                    manager.changeAppTheme();
+                  },
+                ),
+                _buildToggleTile(
+                  icon: FontAwesomeIcons.bell,
+                  title: "Notifications",
+                  value: SharedPrefHelper.getBool('appNotifications') ?? false,
+                  onChanged: (val) {
+                    manager.changeAppNotification();
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.9, end: 1),
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeOutBack,
+            builder: (context, scale, child) =>
+                Transform.scale(scale: scale, child: child),
+            child: _buildSectionCard(
+              title: "About",
+              icon: Icons.info_outlined,
+              children: [_buildAppVersionTile()],
+            ),
+          ),
+          const SizedBox(height: 24),
+          ConditionalBuilder(
+            condition: state is! LoadingState,
+            builder: (context) => ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              icon: const Icon(FontAwesomeIcons.rightFromBracket),
+              label: const Text("Logout", style: TextStyle(fontSize: 16)),
+              onPressed: () {
+                manager.logout();
+              },
+            ),
+            fallback: (context) =>
+                Center(child: const CircularProgressIndicator()),
+          ),
+        ],
       ),
     );
   }
@@ -176,7 +154,7 @@ class Settings extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withAlpha(76),
             blurRadius: 8,
             offset: const Offset(0, 5),
           ),
@@ -201,7 +179,6 @@ class Settings extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           Divider(color: Colors.white),
-          //const SizedBox(height: 12),
           ...children.map((child) => Column(children: [child])),
         ],
       ),
@@ -243,7 +220,7 @@ class Settings extends StatelessWidget {
         title: Text(title, style: const TextStyle(color: Colors.white70)),
         trailing: Switch(
           value: value,
-          activeColor: Colors.greenAccent,
+          activeThumbColor: Colors.greenAccent,
           onChanged: onChanged,
         ),
       ),
@@ -255,7 +232,7 @@ class Settings extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 0),
       leading: const Icon(FontAwesomeIcons.mobile, color: Colors.greenAccent),
       title: const Text("App Version", style: TextStyle(color: Colors.white70)),
-      trailing: Text(appVersion, style: const TextStyle(color: Colors.white54)),
+      trailing: Text(appVersion, style: const TextStyle(color: Colors.white70)),
     );
   }
 }

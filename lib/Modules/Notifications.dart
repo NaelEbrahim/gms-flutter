@@ -1,4 +1,4 @@
-import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
+import  'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gms_flutter/BLoC/Manager.dart';
@@ -6,11 +6,31 @@ import 'package:gms_flutter/BLoC/States.dart';
 import 'package:gms_flutter/Shared/Components.dart';
 import '../Shared/Constant.dart';
 
-class Notifications extends StatelessWidget {
+class Notifications extends StatefulWidget {
+  const Notifications({super.key});
+
+  @override
+  State<Notifications> createState() => _NotificationsState();
+}
+
+class _NotificationsState extends State<Notifications> {
+  late Manager manager;
+
+  @override
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
+    manager.getNotifications();
+  }
+
+  @override
+  void dispose() {
+    manager.userNotifications.clear();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    var manager = Manager.get(context);
-    manager.getNotifications();
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {
         if (state is ErrorState) {

@@ -43,7 +43,7 @@ class WorkoutList extends StatelessWidget {
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: muscleGroups.length + 1, // +1 → summary card
-        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        separatorBuilder: (_, _) => const SizedBox(height: 16),
         itemBuilder: (context, index) {
           if (index == 0) {
             return Row(
@@ -84,7 +84,7 @@ class WorkoutList extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.45),
+            color: Colors.black.withAlpha(115),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -128,7 +128,7 @@ class WorkoutList extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withAlpha(102),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -144,7 +144,7 @@ class WorkoutList extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.greenAccent.withOpacity(0.4),
+                      color: Colors.greenAccent.withAlpha(102),
                       blurRadius: 18,
                       spreadRadius: 2,
                     ),
@@ -182,12 +182,12 @@ class WorkoutList extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: 14),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.07),
+                      color: Colors.white.withAlpha(18),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      border: Border.all(color: Colors.white.withAlpha(25)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.25),
+                          color: Colors.black.withAlpha(64),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),

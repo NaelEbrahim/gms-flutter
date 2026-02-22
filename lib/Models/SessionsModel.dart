@@ -7,7 +7,7 @@ class SessionsModel {
   final int? classId;
   final ProfileDataModel coach;
   final double? rate;
-  final List<String>? days;
+  final List<SessionScheduleModel> days;
   final String? createdAt;
   final String? startTime;
   final String? endTime;
@@ -26,7 +26,7 @@ class SessionsModel {
     this.classId,
     required this.coach,
     this.rate,
-    this.days,
+    required this.days,
     this.createdAt,
     this.startTime,
     this.endTime,
@@ -39,15 +39,8 @@ class SessionsModel {
     this.classImage
   });
 
-  static List<SessionsModel> parseSessionsList(jsonList) {
-    List<SessionsModel> userSessions = [];
-    if (jsonList != null && (jsonList as List).isNotEmpty) {
-      for (var element in jsonList) {
-        userSessions.add(SessionsModel.fromJson(element));
-      }
-      return userSessions;
-    }
-    return [];
+  static List<SessionsModel> parseSessionsList(List<dynamic> jsonList) {
+    return jsonList.map((e) => SessionsModel.fromJson(e)).toList();
   }
 
   factory SessionsModel.fromJson(Map<String, dynamic> json) {
@@ -58,7 +51,9 @@ class SessionsModel {
       classId: json['classId'] as int?,
       coach: ProfileDataModel.fromJson(json['coach']),
       rate: (json['rate'] as num?)?.toDouble(),
-      days: (json['days'] as List?)?.map((e) => e as String).toList(),
+      days: (json['schedules'] as List)
+          .map((e) => SessionScheduleModel.fromJson(e))
+          .toList(),
       createdAt: json['createdAt'] as String?,
       startTime: json['startTime'] as String?,
       endTime: json['endTime'] as String?,
@@ -69,6 +64,26 @@ class SessionsModel {
       joinedAt: json['joinedAt'] as String?,
       className: json['className'] as String?,
       classImage: json['classImage'] as String?
+    );
+  }
+}
+
+class SessionScheduleModel {
+  final String day;
+  final String startTime;
+  final String endTime;
+
+  SessionScheduleModel({
+    required this.day,
+    required this.startTime,
+    required this.endTime,
+  });
+
+  factory SessionScheduleModel.fromJson(Map<String, dynamic> json) {
+    return SessionScheduleModel(
+      day: json['day'],
+      startTime: json['startTime'],
+      endTime: json['endTime'],
     );
   }
 }

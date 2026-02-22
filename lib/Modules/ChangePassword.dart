@@ -3,35 +3,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gms_flutter/BLoC/Manager.dart';
 import 'package:gms_flutter/BLoC/States.dart';
-import 'package:gms_flutter/Modules/Login.dart';
 
 import '../../Shared/Components.dart';
 import '../../Shared/Constant.dart';
 
-final _resetFormKey = GlobalKey<FormState>();
-final _oldPasswordController = TextEditingController();
-final _newPasswordController = TextEditingController();
-final _confirmPasswordController = TextEditingController();
-
-class ChangePassword extends StatelessWidget {
+class ChangePassword extends StatefulWidget {
   const ChangePassword({super.key});
+
+  @override
+  State<ChangePassword> createState() => _ChangePasswordState();
+}
+
+class _ChangePasswordState extends State<ChangePassword> {
+  bool isOldPasswordHide = true;
+  bool isNewPasswordHide = true;
+  bool isConfirmNewPasswordHide = true;
+  final resetFormKey = GlobalKey<FormState>();
+  TextEditingController oldPasswordController = TextEditingController();
+  TextEditingController newPasswordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    oldPasswordController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {
-        // success
-        if (state is SuccessState) {
-          ReusableComponents.showToast(
-            Manager.get(context).message.toString(),
-            background: Colors.green,
-          );
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Login()),
-            (route) => false,
-          );
-        }
         // error
         if (state is ErrorState) {
           ReusableComponents.showToast(
@@ -41,13 +44,12 @@ class ChangePassword extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        var manager = Manager.get(context);
         return Scaffold(
           backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
-            iconTheme: IconThemeData(color: Colors.white),
+            foregroundColor: Colors.white,
             title: reusableText(
-              content: 'Update Password',
+              content: 'Change Password',
               fontSize: 22.0,
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
@@ -57,12 +59,12 @@ class ChangePassword extends StatelessWidget {
             elevation: 0,
           ),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(15.0),
+            padding: const EdgeInsets.all(10.0),
             child: Form(
-              key: _resetFormKey,
+              key: resetFormKey,
               child: Column(
                 children: [
-                  Icon(Icons.lock, size: 100, color: Colors.teal.shade700),
+                  Icon(Icons.lock, size: 100, color: Colors.teal),
                   const SizedBox(height: 20),
                   const SizedBox(height: 10),
                   reusableText(
@@ -81,16 +83,17 @@ class ChangePassword extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: reusableTextFormField(
-                        controller: _oldPasswordController,
+                        controller: oldPasswordController,
                         hint: "Old Password",
-                        prefixIcon: Icon(
-                          Icons.key,
-                          color: Colors.teal.shade700,
-                        ),
-                        obscureText: manager.eyeVisible,
-                        suffixIcon: manager.eyeIcon,
+                        prefixIcon: Icon(Icons.key),
+                        obscureText: isOldPasswordHide,
+                        suffixIcon: isOldPasswordHide
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         suffixIconFunction: () {
-                          manager.togglePasswordVisibility();
+                          setState(() {
+                            isOldPasswordHide = !isOldPasswordHide;
+                          });
                         },
                         radius: 12,
                         validator: (value) {
@@ -100,9 +103,7 @@ class ChangePassword extends StatelessWidget {
                           if (value.length < 8) {
                             return 'must be at least 8 characters';
                           }
-                          if (!RegExp(
-                            r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$&*])\S{8,}$',
-                          ).hasMatch(value)) {
+                          if (!RegExp(Constant.passwordRegex).hasMatch(value)) {
                             return 'Password must contain 1 uppercase, 1 lowercase, 1 digit and 1 special char';
                           }
                           return null;
@@ -120,16 +121,19 @@ class ChangePassword extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: reusableTextFormField(
-                        controller: _newPasswordController,
+                        controller: newPasswordController,
                         hint: "New Password",
                         prefixIcon: Icon(
                           Icons.lock_outline,
-                          color: Colors.teal.shade700,
                         ),
-                        obscureText: manager.eyeVisible,
-                        suffixIcon: manager.eyeIcon,
+                        obscureText: isNewPasswordHide,
+                        suffixIcon: isNewPasswordHide
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         suffixIconFunction: () {
-                          manager.togglePasswordVisibility();
+                          setState(() {
+                            isNewPasswordHide = !isNewPasswordHide;
+                          });
                         },
                         radius: 12,
                         validator: (value) {
@@ -139,9 +143,7 @@ class ChangePassword extends StatelessWidget {
                           if (value.length < 8) {
                             return 'must be at least 8 characters';
                           }
-                          if (!RegExp(
-                            r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$&*])\S{8,}$',
-                          ).hasMatch(value)) {
+                          if (!RegExp(Constant.passwordRegex).hasMatch(value)) {
                             return 'Password must contain 1 uppercase, 1 lowercase, 1 digit and 1 special char';
                           }
                           return null;
@@ -159,24 +161,26 @@ class ChangePassword extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: reusableTextFormField(
-                        controller: _confirmPasswordController,
+                        controller: confirmPasswordController,
                         hint: "Confirm Password",
-                        prefixIcon: Icon(
-                          Icons.lock_reset,
-                          color: Colors.teal.shade700,
-                        ),
-                        obscureText: manager.eyeVisible,
-                        suffixIcon: manager.eyeIcon,
+                        prefixIcon: Icon(Icons.lock_reset),
+                        obscureText: isConfirmNewPasswordHide,
+                        suffixIcon: isConfirmNewPasswordHide
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         suffixIconFunction: () {
-                          manager.togglePasswordVisibility();
+                          setState(() {
+                            isConfirmNewPasswordHide =
+                                !isConfirmNewPasswordHide;
+                          });
                         },
                         radius: 12,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'confirm password is required';
                           }
-                          if (_newPasswordController.text !=
-                              _confirmPasswordController.text) {
+                          if (newPasswordController.text !=
+                              confirmPasswordController.text) {
                             return 'Passwords do not match';
                           }
                           return null;
@@ -189,18 +193,18 @@ class ChangePassword extends StatelessWidget {
                     condition: state is! LoadingState,
                     builder: (context) => GestureDetector(
                       onTap: () {
-                        if (_resetFormKey.currentState!.validate()) {
-                          manager.changePassword({
-                            'oldPassword': _oldPasswordController.text,
-                            'newPassword': _newPasswordController.text,
+                        if (resetFormKey.currentState!.validate()) {
+                          Manager.get(context).changePassword({
+                            'oldPassword': oldPasswordController.text,
+                            'newPassword': newPasswordController.text,
                           });
                         }
                       },
                       child: Container(
-                        width: double.infinity,
+                        width: Constant.screenWidth / 2,
                         height: 50,
                         decoration: BoxDecoration(
-                          color: Colors.teal.shade700,
+                          color: Colors.teal,
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Center(

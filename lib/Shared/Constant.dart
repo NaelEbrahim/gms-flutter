@@ -15,4 +15,11 @@ class Constant {
   static final String baseAppURL = 'http://192.168.1.5:8081/api/';
 
   static final String mediaURL = baseAppURL.substring(0, Constant.baseAppURL.length - 5);
+
+  // Validation Regex
+  static final String emailRegex =
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$';
+
+  static final String passwordRegex =
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$&*])\S{8,}$';
 }

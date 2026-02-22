@@ -10,18 +10,81 @@ import '../../../Models/ArticlesModel.dart';
 import '../../../Shared/Constant.dart';
 import 'ArticleDetail.dart';
 
-const Color gmsPrimaryDark = Color(0xFF003366); // Deep Navy
-const Color gmsTeal700 = Colors.teal; // Main Accent
-const Color gmsBackgroundLight = Color(0xFFF7F7F7); // Soft background
+class KnowledgeHubHome extends StatefulWidget {
+  const KnowledgeHubHome({super.key});
 
-class KnowledgeHubHome extends StatelessWidget {
-  String selectedCategory = 'All';
+  @override
+  State<KnowledgeHubHome> createState() => _KnowledgeHubHomeState();
+}
+
+class _KnowledgeHubHomeState extends State<KnowledgeHubHome> {
+  int page = 0;
+  late Manager manager;
   String currentSort = 'Newest';
+  String selectedCategory = 'All';
+
+  bool hasMore = true;
+  bool _isLoading = false;
+  List<Article> displayedArticles = [];
+  final ScrollController scrollController = ScrollController();
+
+  static final List<String> articleCategories = [
+    'All',
+    'Health',
+    'Sport',
+    'Food',
+    'Fitness',
+    'Supplements',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
+    manager.articles.articles.clear();
+    _loadMore();
+    scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!scrollController.hasClients) return;
+    if (scrollController.position.pixels >=
+            scrollController.position.maxScrollExtent - 200 &&
+        !_isLoading &&
+        hasMore) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoading || !hasMore) return;
+    setState(() => _isLoading = true);
+    final before = manager.articles.articles.length;
+    await manager.getArticles(page, selectedCategory);
+    final after = manager.articles.articles.length;
+    if (after == before) {
+      hasMore = false;
+    } else {
+      final newArticles = manager.articles.articles.sublist(before);
+      if (page == 0) {
+        // Filter only first batch
+        displayedArticles = _filterArticles(manager.articles.articles);
+      } else {
+        displayedArticles.addAll(newArticles);
+      }
+      page++;
+    }
+    setState(() => _isLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
-    Manager _manager = Manager.get(context);
-    _manager.getArticles(data: {'wiki': selectedCategory});
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {
         if (state is ErrorState) {
@@ -45,33 +108,18 @@ class KnowledgeHubHome extends StatelessWidget {
             centerTitle: true,
             elevation: 1,
             iconTheme: const IconThemeData(color: Colors.white),
-            actions: [
-              IconButton(
-                icon: const FaIcon(
-                  FontAwesomeIcons.magnifyingGlass,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                onPressed: () {
-                  // Implement Search functionality
-                },
-              ),
-              const SizedBox(width: 10),
-            ],
           ),
           body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Column(
               children: [
                 const SizedBox(height: 15),
-                // --- Category Selector ---
-                _buildCategorySelector(_manager),
+                _buildCategorySelector(),
                 const SizedBox(height: 20),
-                // --- Filter Results
                 Row(
                   children: [
                     Text(
-                      'Latest Articles',
+                      'Available Articles',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -87,11 +135,14 @@ class KnowledgeHubHome extends StatelessWidget {
                         color: Colors.teal,
                       ),
                       underline: const SizedBox(),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
+                      onChanged: (String? newValue) async {
+                        if (newValue == null) return;
+                        setState(() {
                           currentSort = newValue;
-                          _manager.updateState();
-                        }
+                          displayedArticles = _filterArticles(
+                            displayedArticles,
+                          );
+                        });
                       },
                       items: <String>['Newest', 'Oldest', 'Longest']
                           .map<DropdownMenuItem<String>>((String value) {
@@ -110,46 +161,38 @@ class KnowledgeHubHome extends StatelessWidget {
                     ),
                   ],
                 ),
-                ConditionalBuilder(
-                  condition: state is! LoadingState,
-                  builder: (context) {
-                    if (state is SuccessState || state is UpdateNewState) {
-                      if (_manager.articles!.articles.isNotEmpty) {
-                        var resultList = _filterArticles(
-                          _manager.articles!.articles,
-                        );
-                        return Expanded(
-                          child: ListView.separated(
-                            itemBuilder: (context, index) =>
-                                _buildCompactArticleCard(
-                                  context,
-                                  resultList.elementAt(index),
-                                ),
-                            separatorBuilder: (context, index) =>
-                                SizedBox(height: 20.0),
-                            itemCount: resultList.length,
-                          ),
+                Expanded(
+                  child: ConditionalBuilder(
+                    condition: state is! LoadingState,
+                    builder: (context) {
+                      if (state is SuccessState) {
+                        return ListView.separated(
+                          controller: scrollController,
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: displayedArticles.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index < displayedArticles.length) {
+                              return _buildCompactArticleCard(
+                                context,
+                                displayedArticles[index],
+                              );
+                            }
+                            return _isLoading
+                                ? const Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  )
+                                : const SizedBox();
+                          },
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 20.0),
                         );
                       } else {
-                        return Expanded(
-                          child: const Center(
-                            child: Text(
-                              "no Articles found.",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                    } else {
-                      return Expanded(
-                        child: Center(
+                        return Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               reusableText(
                                 content: 'Connection error!',
@@ -159,9 +202,7 @@ class KnowledgeHubHome extends StatelessWidget {
                               const SizedBox(height: 10.0),
                               GestureDetector(
                                 onTap: () {
-                                  _manager.getArticles(
-                                    data: {'wiki': selectedCategory},
-                                  );
+                                  manager.getArticles(page, selectedCategory);
                                 },
                                 child: Container(
                                   height: 50,
@@ -198,12 +239,11 @@ class KnowledgeHubHome extends StatelessWidget {
                               ),
                             ],
                           ),
-                        ),
-                      );
-                    }
-                  },
-                  fallback: (context) => Expanded(
-                    child: Center(child: const CircularProgressIndicator()),
+                        );
+                      }
+                    },
+                    fallback: (context) =>
+                        Center(child: const CircularProgressIndicator()),
                   ),
                 ),
               ],
@@ -214,21 +254,29 @@ class KnowledgeHubHome extends StatelessWidget {
     );
   }
 
-  Widget _buildCategorySelector(Manager _manager) {
+  Widget _buildCategorySelector() {
     return SizedBox(
       height: 50,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: ArticlesModel.articleCategories.length,
+        itemCount: articleCategories.length,
         itemBuilder: (context, index) {
-          final category = ArticlesModel.articleCategories[index];
+          final category = articleCategories[index];
           final isSelected = category == selectedCategory;
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6.0),
             child: GestureDetector(
-              onTap: () {
-                selectedCategory = category;
-                _manager.getArticles(data: {'wiki': selectedCategory});
+              onTap: () async {
+                if (!isSelected) {
+                  setState(() {
+                    page = 0;
+                    hasMore = true;
+                    selectedCategory = category;
+                    manager.articles.articles.clear();
+                    displayedArticles.clear();
+                  });
+                  await _loadMore();
+                }
               },
               child: Chip(
                 padding: const EdgeInsets.symmetric(
@@ -238,7 +286,7 @@ class KnowledgeHubHome extends StatelessWidget {
                 label: Text(
                   category,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : gmsPrimaryDark,
+                    color: isSelected ? Colors.white : Color(0xFF003366),
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   ),
                 ),
@@ -278,7 +326,7 @@ class KnowledgeHubHome extends StatelessWidget {
           borderRadius: BorderRadius.circular(18.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.teal.withOpacity(0.4),
+              color: Colors.teal.withAlpha(102),
               blurRadius: 5,
               offset: const Offset(0, 6),
             ),
@@ -290,7 +338,7 @@ class KnowledgeHubHome extends StatelessWidget {
               child: Opacity(
                 opacity: 0.08,
                 child: Image.asset(
-                  'images/1.png',
+                  'images/article_logo.jpg',
                   fit: BoxFit.cover,
                 ),
               ),
@@ -303,24 +351,24 @@ class KnowledgeHubHome extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12.0),
                     child: Image.asset(
-                      'images/1.png',
+                      'images/article_logo.jpg',
                       width: 80,
                       height: 90,
                       fit: BoxFit.cover,
                     ),
                   ),
                   const SizedBox(width: 14.0),
-                  // --- Text content ---
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // WikiType Tag
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withAlpha(51),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -366,11 +414,10 @@ class KnowledgeHubHome extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // --- Arrow icon ---
                   const SizedBox(width: 5.0),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withAlpha(38),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.all(8),
@@ -390,17 +437,17 @@ class KnowledgeHubHome extends StatelessWidget {
   }
 
   List<Article> _filterArticles(List<Article> list) {
-    List<Article> articles = list.where((article) {
-      return selectedCategory == 'All' || article.wikiType == selectedCategory;
-    }).toList();
+    List<Article> articles = list
+        .where(
+          (a) => selectedCategory == 'All' || a.wikiType == selectedCategory,
+        )
+        .toList();
     if (currentSort == 'Newest') {
       articles.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } else if (currentSort == 'Oldest') {
       articles.sort((a, b) => a.createdAt.compareTo(b.createdAt));
     } else if (currentSort == 'Longest') {
-      articles.sort(
-        (a, b) => b.minReadTime! - a.minReadTime!,
-      );
+      articles.sort((a, b) => b.minReadTime! - a.minReadTime!);
     }
     return articles;
   }

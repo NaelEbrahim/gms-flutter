@@ -56,7 +56,6 @@ Widget reusableTextFormField({
 }) => TextFormField(
   controller: controller,
   obscureText: obscureText,
-  cursorColor: Colors.black,
   keyboardType: textInputType,
   maxLines: maxLines,
   readOnly: readOnly,
@@ -104,18 +103,32 @@ Widget reusableTextFormField({
 );
 
 Widget reusableTextButton({
-  required text,
+  required String text,
   required Function() function,
+  double height = 20.0,
+  double width = 50.0,
   Color textColor = Colors.white,
   double fontSize = 20.0,
   FontWeight fontWeight = FontWeight.bold,
-}) => TextButton(
-  onPressed: function,
-  child: reusableText(
-    content: text,
-    fontSize: fontSize,
-    fontWeight: fontWeight,
-    fontColor: textColor,
+}) => GestureDetector(
+  onTap: function,
+  child: Container(
+    alignment: Alignment.center,
+    height: height,
+    width: width,
+    decoration: BoxDecoration(
+      color: Colors.teal,
+      borderRadius: BorderRadius.circular(10.0),
+    ),
+    child: Text(
+      text,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: fontSize,
+        color: textColor,
+        fontWeight: fontWeight,
+      ),
+    ),
   ),
 );
 
@@ -131,9 +144,12 @@ class ReusableComponents {
     );
   }
 
-  static String formatDateTime(String dateTimeString , {String format = 'yyyy/MM/dd HH:mm'}) {
+  static String formatDateTime(
+    String dateTimeString, {
+    String format = 'yyyy/MM/dd HH:mm',
+  }) {
     final dateTime = DateTime.parse(dateTimeString);
-    final formatted = DateFormat(format).format(dateTime); //•
+    final formatted = DateFormat(format).format(dateTime);
     return formatted;
   }
 
@@ -143,17 +159,16 @@ class ReusableComponents {
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
       return image;
     } catch (e) {
-      print("Image picking error: $e");
       return null;
     }
   }
 
   static Future<void> deleteDialog<T extends Cubit<BLoCStates>>(
-      BuildContext context,
-      Future<void> Function() onDelete, {
-        String? title,
-        String? body,
-      }) async {
+    BuildContext context,
+    Future<void> Function() onDelete, {
+    String? title,
+    String? body,
+  }) async {
     final bloc = BlocProvider.of<T>(context);
 
     await showDialog(
@@ -186,7 +201,10 @@ class ReusableComponents {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
                 BlocBuilder<T, BLoCStates>(
                   builder: (context, state) {
@@ -209,7 +227,6 @@ class ReusableComponents {
       },
     );
   }
-
 
   static Future<bool> saveImageToGallery(String pathOrUrl) async {
     final isGranted = await _requestStoragePermission();
@@ -238,19 +255,18 @@ class ReusableComponents {
     if (Platform.isAndroid) {
       final deviceInfo = DeviceInfoPlugin();
       final androidInfo = await deviceInfo.androidInfo;
-      // Android 13+ uses photos permission
+      // Android 13+
       if (androidInfo.version.sdkInt >= 33) {
         final status = await Permission.photos.request();
         return status.isGranted;
       } else {
-        // Android 9–12 use storage permission
+        // Android 9–12
         final status = await Permission.storage.request();
         return status.isGranted;
       }
     }
     return false;
   }
-
 }
 
 class MuscleHighlightIcon extends StatelessWidget {
@@ -263,7 +279,9 @@ class MuscleHighlightIcon extends StatelessWidget {
     super.key,
     required this.muscleName,
     this.size = 60.0, // Default size matches your original 60
-    this.highlightColor = const Color(0xFF64FFDA), // greenAccent.shade400 equivalent
+    this.highlightColor = const Color(
+      0xFF64FFDA,
+    ), // greenAccent.shade400 equivalent
     this.defaultColor = Colors.black45,
   });
 
@@ -277,7 +295,6 @@ class MuscleHighlightIcon extends StatelessWidget {
     "abs": "abs",
     "core": "abs",
     "obliques": "abs", // Mapped to general abs area
-
     // Upper Body
     "chest": "chest",
     "pecs": "chest",
@@ -289,7 +306,6 @@ class MuscleHighlightIcon extends StatelessWidget {
     "biceps": "arm",
     "triceps": "arm",
     "forearms": "arm", // Mapped to general arm area
-
     // Shoulders
     "shoulders": "shoulder",
     "delts": "shoulder",
@@ -306,7 +322,10 @@ class MuscleHighlightIcon extends StatelessWidget {
   // --- 2. GET PART METHOD ---
   String _getPartToHighlight() {
     // 1. Clean the input string (e.g., "Primary Muscle" -> "primary")
-    final cleanedName = muscleName.split(" ").map((s) => s.trim().toLowerCase()).join(" ");
+    final cleanedName = muscleName
+        .split(" ")
+        .map((s) => s.trim().toLowerCase())
+        .join(" ");
 
     // 2. Try exact matches first
     if (_muscleToBodyPart.containsKey(cleanedName)) {
@@ -331,7 +350,8 @@ class MuscleHighlightIcon extends StatelessWidget {
 
     // Determine the view side based on the highlighted part
     // Most back muscles are best viewed from the back.
-    final viewType = (partToHighlight == "back" || partToHighlight == "buttocks")
+    final viewType =
+        (partToHighlight == "back" || partToHighlight == "buttocks")
         ? BodyViewType.back
         : BodyViewType.front;
 

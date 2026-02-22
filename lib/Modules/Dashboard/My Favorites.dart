@@ -9,20 +9,37 @@ import 'package:gms_flutter/Shared/Constant.dart';
 import '../../BLoC/Manager.dart';
 import '../../Shared/Components.dart';
 
-class MyFavorites extends StatelessWidget {
-  MyFavorites({super.key});
 
-  late Manager _manager;
+class MyFavorites extends StatefulWidget {
+  const MyFavorites({super.key});
+
+  @override
+  State<MyFavorites> createState() => _MyFavoritesState();
+}
+
+class _MyFavoritesState extends State<MyFavorites> {
+  late Manager manager;
+
+  @override
+  void initState() {
+    super.initState();
+    manager = Manager.get(context);
+    manager.getUserFavorites();
+  }
+
+  @override
+  void dispose() {
+    manager.userFavorites.clear();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    _manager = Manager.get(context);
-    _manager.getUserFavorites();
-    return BlocConsumer<Manager,BLoCStates>(
+    return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {},
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: const Color(0xff212121),
+          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             iconTheme: const IconThemeData(color: Colors.white),
             title: reusableText(
@@ -39,29 +56,22 @@ class MyFavorites extends StatelessWidget {
             condition: state is! LoadingState,
             builder: (context) {
               if (state is SuccessState || state is UpdateNewState) {
-                return _manager.userFavorites.isEmpty
+                return manager.userFavorites.isEmpty
                     ? const Center(
                         child: Text(
                           "No favorites yet.",
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 16),
                         ),
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.all(10),
-                        itemCount: _manager.userFavorites.length,
+                        itemCount: manager.userFavorites.length,
                         itemBuilder: (context, index) {
-                          final workout = _manager.userFavorites.elementAt(
+                          final workout = manager.userFavorites.elementAt(
                             index,
                           );
-                          return _buildFavoriteCard(
-                            workout,
-                            index,
-                            context,
-                          );
+                          return _buildFavoriteCard(workout, index, context);
                         },
                       );
               } else {
@@ -78,7 +88,7 @@ class MyFavorites extends StatelessWidget {
                       const SizedBox(height: 10.0),
                       GestureDetector(
                         onTap: () {
-                          _manager.getUserFavorites();
+                          manager.getUserFavorites();
                         },
                         child: Container(
                           height: 50,
@@ -132,92 +142,90 @@ class MyFavorites extends StatelessWidget {
     BuildContext context,
   ) {
     return TweenAnimationBuilder<double>(
+      key: ValueKey(workout.id),
       tween: Tween(begin: 0.9, end: 1),
       duration: Duration(milliseconds: 500 + (index * 120)),
       curve: Curves.easeOutBack,
       builder: (context, scale, child) {
         return Transform.scale(scale: scale, child: child);
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: LinearGradient(
-            colors: [Colors.teal.shade700, Constant.scaffoldColor],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      child: GestureDetector(
+        onTap: (){
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WorkoutDetails(workout: workout),
+            ),
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Constant.scaffoldColor],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(102),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(102),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                height: 60,
-                width: 60,
-                color: Colors.black26,
-                child: workout.imagePath != null && workout.imagePath.toString() != 'null'
-                    ? Image.network(
-                  Constant.mediaURL + workout.imagePath!,
-                  fit: BoxFit.contain ,
-                  errorBuilder: (context, error, stackTrace) => const Center(
-                    child: Icon(
-                      Icons.image_rounded,
-                      size: 60,
-                      color: Colors.greenAccent,
-                    ),
-                  ),
-                )
-                    : const Center(
-                  child: Icon(
-                    Icons.fitness_center,
-                    size: 60,
-                    color: Colors.greenAccent,
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  color: Colors.black26,
+                  child:
+                  (workout.imagePath != null)
+                      ? Image.network(
+                          Constant.mediaURL + workout.imagePath!,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Center(
+                                child: Icon(
+                                  Icons.fitness_center,
+                                  size: 60,
+                                  color: Colors.greenAccent,
+                                ),
+                              ),
+                        )
+                      : Icon(
+                        Icons.fitness_center,
+                        size: 60,
+                        color: Colors.greenAccent,
+                      ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  workout.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-
-            /// Workout title
-            Expanded(
-              child: Text(
-                workout.title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+              IconButton(
+                icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
+                onPressed: () {
+                  ReusableComponents.deleteDialog<Manager>(context, () async {
+                    manager.deleteFavoriteRecord(workout.id.toString());
+                  });
+                },
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.info_outlined, color: Colors.greenAccent),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => WorkoutDetails(workout: workout),
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
-              onPressed: () {
-                ReusableComponents.deleteDialog<Manager>(context, () async {
-                  _manager.deleteFavoriteRecord(workout.id.toString());
-                });
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

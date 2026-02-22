@@ -3,10 +3,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gms_flutter/Models/ProfileModel.dart';
 import 'package:gms_flutter/Modules/Dashboard/Helper/ClassPrograms.dart';
 import 'package:gms_flutter/Shared/Components.dart';
+import 'package:gms_flutter/Shared/Constant.dart';
 
 class ClassInfo extends StatelessWidget {
   final String classId;
-  final String image;
+  final String? image;
   final String title;
   final String description;
   final String pricePerMonth;
@@ -27,7 +28,7 @@ class ClassInfo extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xff212121),
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        foregroundColor: Colors.white,
         title: reusableText(
           content: 'Class Info',
           fontSize: 22.0,
@@ -41,10 +42,8 @@ class ClassInfo extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Class Banner
           _buildBanner(),
           const SizedBox(height: 20),
-          // Coach
           _buildTitleAndCoach(),
           const SizedBox(height: 16),
           GestureDetector(
@@ -63,14 +62,12 @@ class ClassInfo extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          // Price
           _buildInfoCard(
             icon: FontAwesomeIcons.moneyBillWave,
             title: "Price (per month)",
-            value: '$pricePerMonth  SYP',
+            value: '$pricePerMonth  USD',
           ),
           const SizedBox(height: 16),
-          // Description
           _buildDescriptionCard(),
         ],
       ),
@@ -80,48 +77,44 @@ class ClassInfo extends StatelessWidget {
   Widget _buildBanner() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
-      child: Stack(
-        children: [
-          Image.asset(
-            image,
-            height: 200,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
+      child: Center(
+        child: Stack(
+          children: [
+            if (image != null)
+              Image.network(
+                Constant.mediaURL + image.toString(),
+                height: 180,
+                width: double.infinity,
+                fit: BoxFit.fill,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.fitness_center, size: 100),
+              )
+            else
+              const Icon(Icons.image_not_supported_outlined, size: 100),
+            Container(
               height: 200,
-              color: Colors.black26,
-              child: const Center(
-                child: Icon(
-                  FontAwesomeIcons.image,
-                  size: 60,
-                  color: Colors.greenAccent,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.black.withAlpha(155), Colors.transparent],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
                 ),
               ),
             ),
-          ),
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.black.withAlpha(155), Colors.transparent],
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
+            Positioned(
+              bottom: 16,
+              left: 16,
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.greenAccent,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: 16,
-            left: 16,
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.greenAccent,
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -134,17 +127,19 @@ class ClassInfo extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(40),
-            child: Image.asset(
-              coach.profileImagePath.toString(),
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                FontAwesomeIcons.userTie,
-                color: Colors.greenAccent,
-                size: 40,
-              ),
-            ),
+            child: (coach.profileImagePath != null)
+                ? Image.network(
+                    Constant.mediaURL + coach.profileImagePath.toString(),
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.broken_image,
+                      color: Colors.greenAccent,
+                      size: 40,
+                    ),
+                  )
+                : const Icon(Icons.person, color: Colors.greenAccent, size: 40),
           ),
           const SizedBox(width: 16),
           Expanded(

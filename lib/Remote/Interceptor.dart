@@ -1,18 +1,19 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:gms_flutter/BLoC/Manager.dart';
 import 'package:gms_flutter/Remote/Dio_Linker.dart';
-import 'package:gms_flutter/Shared/Components.dart';
-
-import '../Modules/Login.dart';
-import '../Shared/SecureStorage.dart';
-import '../main.dart';
-import 'End_Points.dart';
+import 'package:gms_flutter/Remote/End_Points.dart';
+import 'package:gms_flutter/Shared/SecureStorage.dart';
 
 class AuthInterceptor extends Interceptor {
   final Dio dio;
   bool _isRefreshing = false;
-  final noAuthEndpoints = {LOGIN, REFRESHTOKEN};
+  final noAuthEndpoints = {
+    LOGIN,
+    REFRESHTOKEN,
+    FORGOTPASSWORD,
+    VERIFYCODE,
+    RESETFORGOTPASSWORD,
+  };
 
   AuthInterceptor(this.dio);
 
@@ -21,7 +22,7 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Skip adding token to these APIs
+    // Skip adding token to these endPoints
     if (noAuthEndpoints.contains(options.path)) {
       return handler.next(options);
     }
@@ -51,28 +52,16 @@ class AuthInterceptor extends Interceptor {
             },
             extra: {...req.extra, 'retry': true},
           );
-
           final cloneResponse = await dio.request(
             req.path,
             data: req.data,
             queryParameters: req.queryParameters,
             options: opts,
           );
-
           return handler.resolve(cloneResponse);
         } else {
           Manager manager = Manager();
-          manager.logout();
-          Future.microtask(() {
-            MyApp.navigatorKey.currentState?.pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => Login()),
-              (_) => false,
-            );
-          });
-          ReusableComponents.showToast(
-            'Your session expired. Please log in again to continue.',
-            background: Colors.red,
-          );
+          manager.performLogout();
           handler.next(err);
         }
       } catch (_) {
