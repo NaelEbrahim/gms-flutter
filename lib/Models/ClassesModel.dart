@@ -9,13 +9,13 @@ class ClassesModel {
   final String? description;
   final String? imagePath;
   final double? price;
-  final bool isActive;
-  final String? myFeedBack;
-  final String? joinedAt;
+  final bool isActive;//
+  final String? myFeedBack;//
+  final String? joinedAt;//
 
   final List<dynamic>? programs;
-  final List<dynamic>? subscribers;
-  final List<dynamic>? feedbacks;
+  final List<dynamic>? subscribers;//
+  final List<dynamic>? feedbacks;//
 
   ClassesModel({
     required this.coach,
@@ -50,6 +50,54 @@ class ClassesModel {
       programs: json['programs'] as List<dynamic>?,
       subscribers: json['subscribers'] as List<dynamic>?,
       feedbacks: json['feedbacks'] as List<dynamic>?,
+    );
+  }
+
+
+  factory ClassesModel.fromNestedJson(Map<String, dynamic> json) {
+    return ClassesModel(
+      id: json['id'],
+      name: json['name'],
+      description: json['description'],
+      price: (json['price'] as num).toDouble(),
+      coach: UserModel.fromJson(json['coach']),
+      imagePath: json['imagePath'],
+      programs: null,
+      subscribers: null,
+      feedbacks: null,
+      isActive: false,
+      myFeedBack: null,
+      joinedAt: null,
+    );
+  }
+
+  static List<ClassesModel> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => ClassesModel.fromNestedJson(e)).toList();
+  }
+}
+
+class GetClassesModel {
+  final int count;
+
+  final int totalPages;
+
+  final int currentPage;
+
+  final List<ClassesModel> items;
+
+  GetClassesModel({
+    required this.count,
+    required this.totalPages,
+    required this.currentPage,
+    required this.items,
+  });
+
+  factory GetClassesModel.fromJson(Map<String, dynamic> json) {
+    return GetClassesModel(
+      count: json['count'],
+      totalPages: json['totalPages'],
+      currentPage: json['currentPage'],
+      items: ClassesModel.parseList(json['classes']),
     );
   }
 }

@@ -1,7 +1,4 @@
-import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gms_flutter/BLoC/States.dart';
 import 'package:gms_flutter/Modules/Home/Dashboard.dart';
 import 'package:gms_flutter/Modules/Home/Home.dart';
 import 'package:gms_flutter/Modules/Home/ShowQR.dart';
@@ -24,6 +21,8 @@ class Base extends StatefulWidget {
 }
 
 class _BaseState extends State<Base> {
+  late Manager manager;
+
   int bottomNavIndex = 0;
 
   List<Widget> screens = [Home(), Dashboard(), ShowQR(), Settings()];
@@ -33,99 +32,82 @@ class _BaseState extends State<Base> {
   @override
   void initState() {
     super.initState();
-    Manager.get(context).getUserProfile();
+    manager = Manager.get(context);
+    manager.getUserProfile();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<Manager, BLoCStates>(
-      listener: (context, state) {
-        // error
-        if (state is ErrorState) {
-          ReusableComponents.showToast(
-            state.error.toString(),
-            background: Colors.red,
-          );
-        }
-      },
-      builder: (context, state) {
-        return Scaffold(
-          key: _scaffoldKey,
-          backgroundColor: Constant.scaffoldColor,
-          drawer: buildDrawer(context),
-          appBar: AppBar(
-            leading: IconButton(
-              onPressed: () {
-                _scaffoldKey.currentState?.openDrawer();
-              },
-              icon: Icon(Icons.menu, color: Colors.white),
-            ),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Notifications()),
-                  );
-                },
-                icon: Icon(Icons.notifications, color: Colors.white),
-              ),
-            ],
-            backgroundColor: Colors.black,
-            centerTitle: true,
-            title: reusableText(
-              content: 'ShapeUp',
-              fontSize: 22.0,
-              fontColor: Colors.greenAccent,
-              fontWeight: FontWeight.bold,
-            ),
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: Constant.scaffoldColor,
+      drawer: buildDrawer(context),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            _scaffoldKey.currentState?.openDrawer();
+          },
+          icon: Icon(Icons.menu, color: Colors.white),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Notifications()),
+              );
+            },
+            icon: Icon(Icons.notifications, color: Colors.white),
           ),
-          body: SafeArea(
-            child: ConditionalBuilder(
-              condition: state is! LoadingState,
-              builder: (context) => Container(
-                height: Constant.screenHeight,
-                width: Constant.screenWidth,
-                padding: const EdgeInsets.all(10),
-                color: Constant.scaffoldColor,
-                child: Center(child: screens[bottomNavIndex]),
-              ),
-              fallback: (context) =>
-                  Center(child: const CircularProgressIndicator()),
+        ],
+        backgroundColor: Colors.black,
+        centerTitle: true,
+        title: reusableText(
+          content: 'ShapeUp',
+          fontSize: 22.0,
+          fontColor: Colors.greenAccent,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      body: SafeArea(
+        child: Container(
+          height: Constant.screenHeight,
+          width: Constant.screenWidth,
+          padding: const EdgeInsets.all(10),
+          color: Constant.scaffoldColor,
+          child: Center(child: screens[bottomNavIndex]),
+        ),
+      ),
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(canvasColor: Colors.black),
+        child: BottomNavigationBar(
+          currentIndex: bottomNavIndex,
+          onTap: (int index) {
+            setState(() {
+              bottomNavIndex = index;
+            });
+          },
+          selectedItemColor: Colors.greenAccent,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.house_outlined),
+              label: 'Home',
             ),
-          ),
-          bottomNavigationBar: Theme(
-            data: Theme.of(context).copyWith(canvasColor: Colors.black),
-            child: BottomNavigationBar(
-              currentIndex: bottomNavIndex,
-              onTap: (int index) {
-                setState(() {
-                  bottomNavIndex = index;
-                });
-              },
-              selectedItemColor: Colors.greenAccent,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.house_outlined),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.track_changes_outlined),
-                  label: 'Dashboard',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.qr_code_2_outlined),
-                  label: 'QR',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.settings),
-                  label: 'Settings',
-                ),
-              ],
+            BottomNavigationBarItem(
+              icon: Icon(Icons.track_changes_outlined),
+              label: 'Dashboard',
             ),
-          ),
-        );
-      },
+            BottomNavigationBarItem(
+              icon: Icon(Icons.qr_code_2_outlined),
+              label: 'QR',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
+        ),
+      ),
     );
   }
 

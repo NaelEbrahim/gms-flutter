@@ -93,3 +93,17 @@ const LOGWORKOUTPROGRESS = 'user/logProgress';
 const DELETEWORKOUTPROGRESS = 'user/deleteProgress/';
 
 const GETWORKOUTPROGRESS = 'user/getProgressByRange';
+
+const GETALLCLASSES = 'class/show/all';
+
+const GETALLSESSIONS = 'session/show/all';
+
+const GETALLEVENTS = 'event/show/all';
+
+const GETUSEREVENTS = 'event/get-user-events/';
+
+const SUBSCRIBETOEVENT = 'event/subscribe/';
+
+const UNSUBSCRIBEFROMEVENT = 'event/unsubscribe/';
+
+const SAVEFCM = 'user/saveFcmToken';
