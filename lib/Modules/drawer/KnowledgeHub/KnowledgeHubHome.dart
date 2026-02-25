@@ -169,7 +169,7 @@ class _KnowledgeHubHomeState extends State<KnowledgeHubHome> {
                         return ListView.separated(
                           controller: scrollController,
                           physics: const BouncingScrollPhysics(),
-                          itemCount: displayedArticles.length + 1,
+                          itemCount: displayedArticles.length + (_isLoading ? 1 : 0),
                           itemBuilder: (context, index) {
                             if (index < displayedArticles.length) {
                               return _buildCompactArticleCard(

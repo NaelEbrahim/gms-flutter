@@ -34,28 +34,8 @@ class ConversationModel {
     );
   }
 
-  static List<ConversationModel> parseList(jsonList) {
-    List<ConversationModel> userConversations = [];
-    if (jsonList != null && (jsonList as List).isNotEmpty) {
-      for (var element in jsonList) {
-        userConversations.add(ConversationModel.fromJson(element));
-      }
-      return userConversations;
-    }
-    return [];
-  }
-}
-
-class ChatsModel {
-  static List<ChatModel> parseList(jsonList) {
-    List<ChatModel> userChats = [];
-    if (jsonList != null && (jsonList as List).isNotEmpty) {
-      for (var element in jsonList) {
-        userChats.add(ChatModel.fromJson(element));
-      }
-      return userChats;
-    }
-    return [];
+  static List<ConversationModel> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => ConversationModel.fromJson(e)).toList();
   }
 }
 
@@ -72,6 +52,10 @@ class ChatModel {
           .map((msg) => Message.fromJson(msg))
           .toList(),
     );
+  }
+
+  static List<ChatModel> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => ChatModel.fromJson(e)).toList();
   }
 }
 
@@ -111,15 +95,8 @@ class Message {
     );
   }
 
-  static List<Message> parseList(jsonList) {
-    List<Message> messages = [];
-    if (jsonList != null && (jsonList as List).isNotEmpty) {
-      for (var element in jsonList) {
-        messages.add(Message.fromJson(element));
-      }
-      return messages;
-    }
-    return [];
+  static List<Message> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => Message.fromJson(e)).toList();
   }
 }
 

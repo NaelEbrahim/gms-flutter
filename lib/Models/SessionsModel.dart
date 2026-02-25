@@ -36,7 +36,7 @@ class SessionsModel {
     this.myFeedback,
     this.joinedAt,
     this.className,
-    this.classImage
+    this.classImage,
   });
 
   static List<SessionsModel> parseSessionsList(List<dynamic> jsonList) {
@@ -59,13 +59,36 @@ class SessionsModel {
       endTime: json['endTime'] as String?,
       maxNumber: json['maxNumber'] as int?,
       subscribersCount: json['subscribersCount'] as int?,
-      feedbacks: json['feedbacks'] as List<dynamic>?,
       myFeedback: json['myFeedBack'] as String?,
       joinedAt: json['joinedAt'] as String?,
       className: json['className'] as String?,
-      classImage: json['classImage'] as String?
+      classImage: json['classImage'] as String?,
     );
   }
+
+  static List<SessionsModel> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => SessionsModel.fromNestedJson(e)).toList();
+  }
+
+  factory SessionsModel.fromNestedJson(Map<String, dynamic> json) {
+    return SessionsModel(
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      classId: json['classId'],
+      coach: UserModel.fromJson(json['coach']),
+      rate: (json['rate'] as num).toDouble(),
+      days: (json['schedules'] as List)
+          .map((e) => SessionScheduleModel.fromJson(e))
+          .toList(),
+      createdAt: json['createdAt'] as String?,
+      maxNumber: json['maxNumber'],
+      subscribersCount: json['subscribersCount'],
+      className: json['className'],
+      classImage: json['classImage'],
+    );
+  }
+
 }
 
 class SessionScheduleModel {
@@ -84,6 +107,29 @@ class SessionScheduleModel {
       day: json['day'],
       startTime: json['startTime'],
       endTime: json['endTime'],
+    );
+  }
+}
+
+class GetSessionsModel {
+  final int count;
+  final int totalPages;
+  final int currentPage;
+  final List<SessionsModel> items;
+
+  GetSessionsModel({
+    required this.count,
+    required this.totalPages,
+    required this.currentPage,
+    required this.items,
+  });
+
+  factory GetSessionsModel.fromJson(Map<String, dynamic> json) {
+    return GetSessionsModel(
+      count: json['count'],
+      totalPages: json['totalPages'],
+      currentPage: json['currentPage'],
+      items: SessionsModel.parseList(json['sessions']),
     );
   }
 }

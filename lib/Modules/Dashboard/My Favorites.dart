@@ -55,7 +55,7 @@ class _MyFavoritesState extends State<MyFavorites> {
           body: ConditionalBuilder(
             condition: state is! LoadingState,
             builder: (context) {
-              if (state is SuccessState || state is UpdateNewState) {
+              if (state is SuccessState) {
                 return manager.userFavorites.isEmpty
                     ? const Center(
                         child: Text(

@@ -17,20 +17,20 @@ import 'Shared/SharedPrefHelper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Future.delayed(Duration.zero);
-  // Initialize Firebase
-  await Firebase.initializeApp();
-  // Initialize local notifications
-  await LocalNotificationService.init();
-  // Register background handler
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  // Start listening to Firebase messages
-  FirebaseMessagingService();
   // Initialize Dio
   Dio_Linker.init();
   // Initialize Shared Preference
   await SharedPrefHelper.init();
   // Initialize Pusher
   await Pusher_Linker.init();
+  // Initialize local notifications
+  await LocalNotificationService.init();
+  // Initialize Firebase
+  await Firebase.initializeApp();
+  // Initialize Firebase for background handler
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  // Start listening to Firebase messages
+  FirebaseMessagingService();
   runApp(
     MultiBlocProvider(
       providers: [
