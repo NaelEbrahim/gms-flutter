@@ -445,7 +445,6 @@ class Manager extends Cubit<BLoCStates> {
     Dio_Linker.postData(url: ADDCLASSFEEDBACK, data: data)
         .then((value) {
           getUserClasses();
-          MyApp.navigatorKey.currentState?.pop();
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);
@@ -875,6 +874,57 @@ class Manager extends Cubit<BLoCStates> {
               background: Colors.green,
             );
           }
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<ProgramModel> userPrograms = [];
+
+  Future<void> getUserPrograms() async {
+    emit(LoadingState());
+    return Dio_Linker.getData(url: GETUSERPROGRAMS)
+        .then((value) {
+          userPrograms = ProgramModel.parseList(value.data);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void updateProgramRate(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: UPDATEPROGRAMRATE, data: data)
+        .then((value) {
+          getUserPrograms();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void addProgramFeedback(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.postData(url: ADDPROGRAMFEEDBACK, data: data)
+        .then((value) {
+          getUserPrograms();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  void deleteProgramFeedback(Map<String, dynamic> data) {
+    emit(LoadingState());
+    Dio_Linker.deleteData(url: DELETEPROGRAMFEEDBACK, data: data)
+        .then((value) {
+          getUserPrograms();
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);

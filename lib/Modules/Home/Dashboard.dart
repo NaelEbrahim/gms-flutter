@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gms_flutter/Modules/Dashboard/MyEvents.dart';
+import 'package:gms_flutter/Modules/Dashboard/MyPrograms.dart';
 import 'package:gms_flutter/Shared/Components.dart';
 import '../Dashboard/My Favorites.dart';
 import '../Dashboard/MyClasses.dart';
@@ -36,6 +37,7 @@ class Dashboard extends StatelessWidget {
     },
     {"title": "My Favorites", "icon": Icons.star, "screen": MyFavorites()},
     {"title": "My Events", "icon": FontAwesomeIcons.medal, "screen": MyEvents()},
+    {"title": "My Programs", "icon": FontAwesomeIcons.list, "screen": MyPrograms()},
   ];
 
   @override
