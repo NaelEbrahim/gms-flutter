@@ -107,3 +107,11 @@ const SUBSCRIBETOEVENT = 'event/subscribe/';
 const UNSUBSCRIBEFROMEVENT = 'event/unsubscribe/';
 
 const SAVEFCM = 'user/saveFcmToken';
+
+const GETUSERPROGRAMS = 'program/my-programs';
+
+const UPDATEPROGRAMRATE = 'program/rate';
+
+const ADDPROGRAMFEEDBACK = 'program/feedback';
+
+const DELETEPROGRAMFEEDBACK = 'program/delete-user-feedback';
