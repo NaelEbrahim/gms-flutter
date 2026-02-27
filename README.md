@@ -147,7 +147,7 @@ The platform is built using a clean backend architecture with a cross-platform F
 
 - **Backend (Spring Boot):** https://github.com/NaelEbrahim/gms-backend-SpringBoot 
 
-- **Dashboard App (Flutter):** https://github.com/NaelEbrahim/gms-flutter-dashboard
+- **Dashboard App (Flutter Windows):** https://github.com/NaelEbrahim/gms-flutter-dashboard
 
 --- 
 
