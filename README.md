@@ -166,5 +166,5 @@ DashBoard App: https://github.com/NaelEbrahim/gms-flutter-dashboard
 
 👨‍💻 Author
 
-Nael Ebrahim
+Nael Ebrahim:
 Software Engineer — Spring Boot & Flutter Developer
