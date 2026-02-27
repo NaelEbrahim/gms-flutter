@@ -136,10 +136,10 @@ The platform is built using a clean backend architecture with a cross-platform F
 
 📡 API Design
 
-RESTful endpoints
-JSON request/response
-Token-based authentication ready
-Postman collection supported
+- RESTful endpoints
+- JSON request/response
+- Token-based authentication ready
+- Postman collection supported
 
 ---
 
@@ -153,14 +153,14 @@ DashBoard App: https://github.com/NaelEbrahim/gms-flutter-dashboard
 
 🎯 Engineering Achievements
 
-Designed and implemented a scalable full-stack gym management platform
-Built RESTful APIs using Spring Boot
-Implemented real-time chat using Pusher
-Integrated push notifications using Firebase FCM
-Applied 3-Tier and Layered Architecture principles
-Implemented role-based access control
-Developed cross-platform mobile application using Flutter
-Structured production-ready backend architecture
+- Designed and implemented a scalable full-stack gym management platform
+- Built RESTful APIs using Spring Boot
+- Implemented real-time chat using Pusher
+- Integrated push notifications using Firebase FCM
+- Applied 3-Tier and Layered Architecture principles
+- Implemented role-based access control
+- Developed cross-platform mobile application using Flutter
+- Structured production-ready backend architecture
 
 ---
 
