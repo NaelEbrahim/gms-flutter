@@ -134,7 +134,7 @@ The platform is built using a clean backend architecture with a cross-platform F
 
 ---
 
-📡 API Design
+## 📡 API Design
 
 - RESTful endpoints
 - JSON request/response
@@ -143,7 +143,7 @@ The platform is built using a clean backend architecture with a cross-platform F
 
 ---
 
-🔗 Repositories
+## 🔗 Repositories
 
 - **Backend (Spring Boot):** https://github.com/NaelEbrahim/gms-backend-SpringBoot 
 
@@ -151,7 +151,7 @@ The platform is built using a clean backend architecture with a cross-platform F
 
 --- 
 
-🎯 Engineering Achievements
+## 🎯 Engineering Achievements
 
 - Designed and implemented a scalable full-stack gym management platform
 - Built RESTful APIs using Spring Boot
@@ -164,7 +164,7 @@ The platform is built using a clean backend architecture with a cross-platform F
 
 ---
 
-👨‍💻 Author
+## 👨‍💻 Author
 
-Nael Ebrahim:
+**Nael Ebrahim**  
 Software Engineer — Spring Boot & Flutter Developer
