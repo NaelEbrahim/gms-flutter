@@ -1,42 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gms_flutter/Models/ProfileModel.dart';
+import 'package:gms_flutter/Shared/Constant.dart';
 import 'package:gms_flutter/Shared/Components.dart';
 
-class CoachInfoScreen extends StatelessWidget {
-  final String coachName;
-  final String coachImage;
-  final String specialization;
-  final String bio;
-  final double rating;
-  final int classes;
-  final int sessions;
-  final int subscribers;
-  final int dietPlans;
-  final int privateTrainings;
+class UserInfo extends StatelessWidget {
+  final UserModel user;
 
-  const CoachInfoScreen({
-    super.key,
-    required this.coachName,
-    required this.coachImage,
-    required this.specialization,
-    required this.bio,
-    required this.rating,
-    required this.classes,
-    required this.sessions,
-    required this.subscribers,
-    required this.dietPlans,
-    required this.privateTrainings,
-  });
+  const UserInfo({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff212121),
+      backgroundColor: Constant.scaffoldColor,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         title: reusableText(
-          content: 'Coach Info',
-          fontSize: 22.0,
+          content: 'User Info',
+          fontSize: 22,
           fontColor: Colors.greenAccent,
           fontWeight: FontWeight.bold,
         ),
@@ -44,177 +24,84 @@ class CoachInfoScreen extends StatelessWidget {
         centerTitle: true,
         elevation: 0,
       ),
-      body: ListView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        children: [
-          _buildHeader(),
-          const SizedBox(height: 20),
-          _buildStatsCard(),
-          const SizedBox(height: 16),
-          _buildOfferingsCard(),
-          const SizedBox(height: 20),
-          _buildBioCard(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: _cardDecoration(),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(60),
-            child: Image.asset(
-              coachImage,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                FontAwesomeIcons.userTie,
-                size: 60,
-                color: Colors.greenAccent,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.9, end: 1),
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutBack,
+          builder: (context, scale, child) {
+            return Transform.scale(scale: scale, child: child);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                colors: [Colors.teal.shade700, Colors.black87],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  coachName,
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  specialization,
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: List.generate(5, (index) {
-                    return Icon(
-                      index < rating.round() ? Icons.star : Icons.star_border,
-                      color: Colors.greenAccent,
-                      size: 18,
-                    );
-                  }),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withAlpha(102),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatsCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      decoration: _cardDecoration(),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildStatItem(FontAwesomeIcons.dumbbell, "$classes", "Classes"),
-          _buildStatItem(
-            FontAwesomeIcons.calendarDays,
-            "$sessions",
-            "Sessions",
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOfferingsCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      decoration: _cardDecoration(),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildStatItem(
-            FontAwesomeIcons.personRunning,
-            "$privateTrainings",
-            "Private Training",
-          ),
-          _buildStatItem(FontAwesomeIcons.utensils, "$dietPlans", "Diet Plans"),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(IconData icon, String value, String label) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.greenAccent, size: 26),
-        const SizedBox(height: 6),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.greenAccent,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundImage: user.profileImagePath != null
+                        ? NetworkImage(
+                            Constant.mediaURL + user.profileImagePath!,
+                          )
+                        : null,
+                    child: user.profileImagePath == null
+                        ? const Icon(Icons.person, size: 60)
+                        : null,
+                  ),
+                  const SizedBox(height: 20),
+                  _infoRow("First Name", user.firstName),
+                  _infoRow("Last Name", user.lastName),
+                  _infoRow("Email", user.email),
+                  _infoRow("Phone", user.phoneNumber),
+                  _infoRow("Gender", user.gender),
+                  _infoRow("Date of Birth", user.dob),
+                ],
+              ),
+            ),
           ),
         ),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildBioCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: _cardDecoration(),
-      child: Column(
+  Widget _infoRow(String title, String? value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
-            children: [
-              Icon(FontAwesomeIcons.circleInfo, color: Colors.greenAccent),
-              SizedBox(width: 8),
-              Text(
-                "About Coach",
-                style: TextStyle(
-                  color: Colors.greenAccent,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          Text(
+            "$title: ",
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.greenAccent,
+              fontSize: 16,
+            ),
           ),
-          const SizedBox(height: 10),
-          Text(bio, style: const TextStyle(color: Colors.white70, height: 1.4)),
+          Expanded(
+            child: Text(
+              value ?? "-",
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+          ),
         ],
       ),
-    );
-  }
-
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      borderRadius: BorderRadius.circular(16),
-      gradient: LinearGradient(
-        colors: [Colors.teal.shade700, Colors.black87],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withAlpha(76),
-          blurRadius: 8,
-          offset: const Offset(0, 5),
-        ),
-      ],
     );
   }
 }

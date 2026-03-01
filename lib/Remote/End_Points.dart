@@ -115,3 +115,11 @@ const UPDATEPROGRAMRATE = 'program/rate';
 const ADDPROGRAMFEEDBACK = 'program/feedback';
 
 const DELETEPROGRAMFEEDBACK = 'program/delete-user-feedback';
+
+const GETCOACHCLASSES = 'class/get-coach-classes/';
+
+const GETCOACHSESSIONS = 'session/get-coach-sessions/';
+
+const GETCOACHDIETS = 'diet/get-coach-diets/';
+
+const GETCOACHUSERS = 'user/get-coach-user/';

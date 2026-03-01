@@ -18,7 +18,7 @@ class PrivateCoachModel {
       coach: UserModel.fromJson(json['item']),
       isActive: json['isActive'] as bool,
       startedAt: json['startedAt'] as String?,
-      rate: (json['rate'] as num?)?.toDouble(),
+      rate: (json['rate'] ?? 0)?.toDouble(),
     );
   }
 
