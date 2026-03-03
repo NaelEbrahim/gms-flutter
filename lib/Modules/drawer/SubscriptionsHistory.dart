@@ -43,7 +43,6 @@ class _SubscriptionHistoryState extends State<SubscriptionHistory> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             iconTheme: IconThemeData(color: Colors.white),
             title: reusableText(

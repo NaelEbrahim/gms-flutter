@@ -40,7 +40,6 @@ class _VerifyCodeState extends State<VerifyCode> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             backgroundColor: Constant.scaffoldColor,
             elevation: 0,

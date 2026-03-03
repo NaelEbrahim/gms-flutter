@@ -47,7 +47,6 @@ class _MySessionsState extends State<MySessions> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             iconTheme: IconThemeData(color: Colors.white),
             title: reusableText(

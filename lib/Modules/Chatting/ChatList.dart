@@ -48,7 +48,6 @@ class _ChatListState extends State<ChatList> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             title: const Text(
               'ShapeUp Chats',
@@ -91,7 +90,6 @@ class _ChatListState extends State<ChatList> {
                         final chat = chats.elementAt(index);
                         return Container(
                           decoration: BoxDecoration(
-                            color: Constant.scaffoldColor,
                             border: Border(
                               bottom: BorderSide(
                                 color: Colors.grey.shade100,

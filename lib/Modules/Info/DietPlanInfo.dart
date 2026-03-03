@@ -20,7 +20,6 @@ class DietPlanInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff212121),
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         title: reusableText(

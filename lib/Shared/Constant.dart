@@ -12,7 +12,7 @@ class Constant {
 
   static var scaffoldColor = Color(0xff212121);
 
-  static final String baseAppURL = 'http://192.168.1.5:8081/api/';
+  static final String baseAppURL = 'http://192.168.1.2:8081/api/';
 
   static final String mediaURL = baseAppURL.substring(0, Constant.baseAppURL.length - 5);
 

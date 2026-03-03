@@ -36,7 +36,6 @@ class _ClassProgramsState extends State<ClassPrograms> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             backgroundColor: Colors.black,
             centerTitle: true,

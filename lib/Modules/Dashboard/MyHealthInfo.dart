@@ -100,7 +100,6 @@ class _MyHealthInfoState extends State<MyHealthInfo> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             backgroundColor: Colors.black,
             centerTitle: true,
@@ -135,7 +134,7 @@ class _MyHealthInfoState extends State<MyHealthInfo> {
   }
 
   Widget _buildBodyByState(BLoCStates state, BuildContext context) {
-    if (state is SuccessState || state is UpdateNewState) {
+    if (state is SuccessState) {
       if (manager.userHealthInfos.isEmpty) {
         final msg = _startDate.isEmpty && _endDate.isEmpty
             ? "No health records found."

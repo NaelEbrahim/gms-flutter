@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gms_flutter/BLoC/ChatManager.dart';
+import 'package:gms_flutter/BLoC/ThemeManager.dart';
 import 'package:gms_flutter/Modules/Base.dart';
 import 'package:gms_flutter/Remote/Dio_Linker.dart';
 import 'package:gms_flutter/Remote/FCM.dart';
@@ -35,6 +36,7 @@ void main() async {
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => Manager()),
+        BlocProvider(create: (context) => ThemeManager()),
         BlocProvider(create: (context) => ChatManager()),
       ],
       child: const MyApp(),
@@ -51,14 +53,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Constant.initializeScreenSize(context);
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      theme: ThemeData(
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-      ),
-      debugShowCheckedModeBanner: false,
-      home: Base(),
+    return BlocBuilder<ThemeManager, ThemeData>(
+      builder: (context, theme) {
+        return MaterialApp(
+          navigatorKey: navigatorKey,
+          theme: theme,
+          debugShowCheckedModeBanner: false,
+          home: Base(),
+        );
+      },
     );
   }
 }

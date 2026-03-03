@@ -45,7 +45,6 @@ class _ResetPasswordState extends State<ResetPassword> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             backgroundColor: Constant.scaffoldColor,
             elevation: 0,

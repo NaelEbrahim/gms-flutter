@@ -55,7 +55,6 @@ class _LoginState extends State<Login> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           resizeToAvoidBottomInset: false,
           body: SafeArea(
             child: LayoutBuilder(

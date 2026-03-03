@@ -45,7 +45,6 @@ class _ChangePasswordState extends State<ChangePassword> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             foregroundColor: Colors.white,
             title: reusableText(
@@ -66,17 +65,14 @@ class _ChangePasswordState extends State<ChangePassword> {
                 children: [
                   Icon(Icons.lock, size: 100, color: Colors.teal),
                   const SizedBox(height: 20),
-                  const SizedBox(height: 10),
                   reusableText(
                     content: "Fill this fields to update your password",
-                    fontColor: Colors.white70,
                     fontSize: 14,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 30),
                   Card(
                     elevation: 6,
-                    color: Constant.scaffoldColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
@@ -114,7 +110,6 @@ class _ChangePasswordState extends State<ChangePassword> {
                   const SizedBox(height: 20),
                   Card(
                     elevation: 6,
-                    color: Constant.scaffoldColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
@@ -123,9 +118,7 @@ class _ChangePasswordState extends State<ChangePassword> {
                       child: reusableTextFormField(
                         controller: newPasswordController,
                         hint: "New Password",
-                        prefixIcon: Icon(
-                          Icons.lock_outline,
-                        ),
+                        prefixIcon: Icon(Icons.lock_outline),
                         obscureText: isNewPasswordHide,
                         suffixIcon: isNewPasswordHide
                             ? Icons.visibility
@@ -154,7 +147,6 @@ class _ChangePasswordState extends State<ChangePassword> {
                   const SizedBox(height: 20),
                   Card(
                     elevation: 6,
-                    color: Constant.scaffoldColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),

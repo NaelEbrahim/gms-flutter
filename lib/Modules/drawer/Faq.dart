@@ -44,7 +44,6 @@ class _FAQState extends State<FAQ> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             iconTheme: IconThemeData(color: Colors.white),
             title: reusableText(

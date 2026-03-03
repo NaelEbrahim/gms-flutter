@@ -38,10 +38,6 @@ class Manager extends Cubit<BLoCStates> {
 
   static Manager get(BuildContext context) => BlocProvider.of(context);
 
-  void updateState() {
-    emit(UpdateNewState());
-  }
-
   final int paginationSize = 5;
 
   late Login_Model loginModel;
@@ -100,8 +96,6 @@ class Manager extends Cubit<BLoCStates> {
       }
     });
   }
-
-  String? message;
 
   void forgotPassword(Map<String, dynamic> data) {
     emit(LoadingState());
@@ -347,17 +341,11 @@ class Manager extends Cubit<BLoCStates> {
         });
   }
 
-  Future<void> changeAppTheme() async {
-    final darkMode = !(SharedPrefHelper.getBool('appTheme') ?? true);
-    await SharedPrefHelper.saveBool('appTheme', darkMode);
-    emit(UpdateNewState());
-  }
-
   void changeAppNotification() async {
     final appNotifications =
         !(SharedPrefHelper.getBool('appNotifications') ?? true);
     await SharedPrefHelper.saveBool('appNotifications', appNotifications);
-    emit(UpdateNewState());
+    //emit(UpdateNewState());
   }
 
   void changePassword(Map<String, dynamic> data) {
@@ -377,7 +365,6 @@ class Manager extends Cubit<BLoCStates> {
           }
         })
         .catchError((error) {
-          print(error);
           String errorMessage = handleDioError(error);
           emit(ErrorState(errorMessage));
         });

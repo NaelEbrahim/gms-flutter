@@ -80,7 +80,6 @@ class _EventsScreenState extends State<Events> {
         }
       },
       builder: (context, state) => Scaffold(
-        backgroundColor: Constant.scaffoldColor,
         appBar: AppBar(
           foregroundColor: Colors.white,
           backgroundColor: Colors.black,

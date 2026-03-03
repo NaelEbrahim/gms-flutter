@@ -104,7 +104,6 @@ class _WorkoutProgressState extends State<WorkoutProgress> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             backgroundColor: Colors.black,
             centerTitle: true,
@@ -139,7 +138,7 @@ class _WorkoutProgressState extends State<WorkoutProgress> {
   }
 
   Widget _buildBodyByState(BLoCStates state, BuildContext context) {
-    if (state is SuccessState || state is UpdateNewState) {
+    if (state is SuccessState) {
       if (manager.workoutProgresses.isEmpty) {
         final msg = _startDate.isEmpty && _endDate.isEmpty
             ? "No progress records found."

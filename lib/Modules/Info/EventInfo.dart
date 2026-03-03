@@ -30,7 +30,6 @@ class _EventInfoState extends State<EventInfo> {
         }
       },
       builder: (context, state) => Scaffold(
-        backgroundColor: Constant.scaffoldColor,
         appBar: AppBar(
           iconTheme: IconThemeData(color: Colors.white),
           title: reusableText(

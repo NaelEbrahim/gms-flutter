@@ -4,8 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gms_flutter/BLoC/Manager.dart';
 import 'package:gms_flutter/BLoC/States.dart';
+import 'package:gms_flutter/BLoC/ThemeManager.dart';
 import 'package:gms_flutter/Modules/ChangePassword.dart';
-import 'package:gms_flutter/Modules/Home/Profile.dart';
+import 'package:gms_flutter/Modules/Profile.dart';
 import 'package:gms_flutter/Shared/SharedPrefHelper.dart';
 
 class Settings extends StatefulWidget {
@@ -84,8 +85,16 @@ class _SettingsState extends State<Settings> {
                   icon: FontAwesomeIcons.moon,
                   title: "Dark Mode",
                   value: SharedPrefHelper.getBool('appTheme') ?? true,
-                  onChanged: (val) {
-                    manager.changeAppTheme();
+                  onChanged: (val) async {
+                    var isDark = SharedPrefHelper.getBool('appTheme') ?? true;
+                    if (isDark) {
+                      context.read<ThemeManager>().setLight();
+                      await SharedPrefHelper.saveBool('appTheme', false);
+                    } else {
+                      context.read<ThemeManager>().setDark();
+                      await SharedPrefHelper.saveBool('appTheme', true);
+                    }
+                    setState(() {});
                   },
                 ),
                 _buildToggleTile(

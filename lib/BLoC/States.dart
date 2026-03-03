@@ -12,6 +12,3 @@ class ErrorState extends InitialState {
 
   ErrorState(this.error);
 }
-
-// Global States //
-class UpdateNewState extends InitialState {}

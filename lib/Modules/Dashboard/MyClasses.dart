@@ -45,7 +45,6 @@ class _MyClassesState extends State<MyClasses> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             iconTheme: IconThemeData(color: Colors.white),
             title: reusableText(

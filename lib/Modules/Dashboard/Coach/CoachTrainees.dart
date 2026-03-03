@@ -44,7 +44,6 @@ class _CoachTraineesState extends State<CoachTrainees> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             iconTheme: const IconThemeData(color: Colors.white),
             title: reusableText(

@@ -12,7 +12,6 @@ class SessionInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Constant.scaffoldColor,
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         title: reusableText(

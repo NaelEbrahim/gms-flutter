@@ -26,7 +26,6 @@ class ClassInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff212121),
       appBar: AppBar(
         foregroundColor: Colors.white,
         title: reusableText(

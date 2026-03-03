@@ -37,7 +37,6 @@ class _CoachesListState extends State<CoachesList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Constant.scaffoldColor,
       appBar: AppBar(
         title: const Text(
           'ShapeUp Coaches',

@@ -25,7 +25,6 @@ class WorkoutList extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: Constant.scaffoldColor,
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,

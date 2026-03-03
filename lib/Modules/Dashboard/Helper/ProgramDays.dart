@@ -13,7 +13,6 @@ class ProgramDays extends StatelessWidget {
   Widget build(BuildContext context) {
     final days = program.schedule?.days?.keys.toList();
     return Scaffold(
-      backgroundColor: Constant.scaffoldColor,
       appBar: AppBar(
         backgroundColor: Colors.black,
         centerTitle: true,
