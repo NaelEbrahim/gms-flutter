@@ -47,16 +47,13 @@ class _MyDietPlansState extends State<MyDietPlans> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: const Color(0xff212121),
           appBar: AppBar(
-            iconTheme: IconThemeData(color: Colors.white),
             title: reusableText(
               content: 'My Diet-Plans',
               fontSize: 22.0,
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
             ),
-            backgroundColor: Colors.black,
             centerTitle: true,
             elevation: 0,
           ),

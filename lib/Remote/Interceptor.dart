@@ -93,6 +93,7 @@ class AuthInterceptor extends Interceptor {
       if (newAccess != null && newRefresh != null) {
         await TokenStorage.writeAccessToken(newAccess);
         await TokenStorage.writeRefreshToken(newRefresh);
+        await TokenStorage.writeRoles(newAccess);
       }
       return newAccess != null;
     } catch (_) {

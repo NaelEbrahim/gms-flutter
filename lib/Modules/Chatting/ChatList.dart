@@ -48,7 +48,6 @@ class _ChatListState extends State<ChatList> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             title: const Text(
               'ShapeUp Chats',
@@ -64,9 +63,7 @@ class _ChatListState extends State<ChatList> {
                 icon: Icon(Icons.more_vert_outlined),
               ),
             ],
-            backgroundColor: Colors.black,
             elevation: 1,
-            iconTheme: const IconThemeData(color: Colors.white),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
@@ -91,7 +88,6 @@ class _ChatListState extends State<ChatList> {
                         final chat = chats.elementAt(index);
                         return Container(
                           decoration: BoxDecoration(
-                            color: Constant.scaffoldColor,
                             border: Border(
                               bottom: BorderSide(
                                 color: Colors.grey.shade100,

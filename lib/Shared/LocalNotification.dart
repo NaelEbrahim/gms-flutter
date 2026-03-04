@@ -1,10 +1,15 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:gms_flutter/Shared/SharedPrefHelper.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class LocalNotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
   static Future init() async {
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const settings = InitializationSettings(android: android);
     await _plugin.initialize(settings);
@@ -14,6 +19,9 @@ class LocalNotificationService {
     required String title,
     required String body,
   }) async {
+    final isAllowNotification =
+        SharedPrefHelper.getBool('appNotifications') ?? true;
+    if (!isAllowNotification) return;
     const androidDetails = AndroidNotificationDetails(
       'foreground_channel',
       'Foreground Notifications',

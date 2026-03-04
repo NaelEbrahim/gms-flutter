@@ -45,23 +45,20 @@ class _MyClassesState extends State<MyClasses> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
-            iconTheme: IconThemeData(color: Colors.white),
             title: reusableText(
               content: 'My Classes',
               fontSize: 22.0,
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
             ),
-            backgroundColor: Colors.black,
             centerTitle: true,
             elevation: 0,
           ),
           body: ConditionalBuilder(
             condition: state is! LoadingState,
             builder: (context) {
-              if (state is SuccessState || state is UpdateNewState) {
+              if (state is SuccessState) {
                 return ListView.builder(
                   padding: const EdgeInsets.all(10),
                   itemCount: manager.userClasses.length,

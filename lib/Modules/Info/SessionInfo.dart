@@ -12,16 +12,13 @@ class SessionInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Constant.scaffoldColor,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
         title: reusableText(
           content: 'Session Info',
           fontSize: 22.0,
           fontColor: Colors.greenAccent,
           fontWeight: FontWeight.bold,
         ),
-        backgroundColor: Colors.black,
         centerTitle: true,
         elevation: 0,
       ),

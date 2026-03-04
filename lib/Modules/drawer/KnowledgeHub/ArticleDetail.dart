@@ -27,7 +27,6 @@ class _ArticleDetailState extends State<ArticleDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -38,7 +37,6 @@ class _ArticleDetailState extends State<ArticleDetail> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(FontAwesomeIcons.bookmark, color: Colors.white),

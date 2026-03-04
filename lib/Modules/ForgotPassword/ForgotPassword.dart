@@ -37,7 +37,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             foregroundColor: Colors.white,
             backgroundColor: Constant.scaffoldColor,

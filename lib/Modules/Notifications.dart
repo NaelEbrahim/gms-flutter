@@ -42,9 +42,7 @@ class _NotificationsState extends State<Notifications> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
-            iconTheme: IconThemeData(color: Colors.white),
             title: reusableText(
               content: 'Notifications',
               fontSize: 22.0,
@@ -52,12 +50,11 @@ class _NotificationsState extends State<Notifications> {
               fontWeight: FontWeight.bold,
             ),
             centerTitle: true,
-            backgroundColor: Colors.black,
           ),
           body: ConditionalBuilder(
             condition: state is! LoadingState,
             builder: (context) {
-              if (state is SuccessState || state is UpdateNewState) {
+              if (state is SuccessState) {
                 return manager.userNotifications.isNotEmpty
                     ? ListView.builder(
                         padding: const EdgeInsets.all(16),

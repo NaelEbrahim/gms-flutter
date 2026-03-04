@@ -96,7 +96,6 @@ class _KnowledgeHubHomeState extends State<KnowledgeHubHome> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
             title: reusableText(
               content: 'Knowledge Hub',
@@ -104,10 +103,8 @@ class _KnowledgeHubHomeState extends State<KnowledgeHubHome> {
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
             ),
-            backgroundColor: Colors.black,
             centerTitle: true,
             elevation: 1,
-            iconTheme: const IconThemeData(color: Colors.white),
           ),
           body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),

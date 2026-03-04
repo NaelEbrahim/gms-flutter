@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gms_flutter/BLoC/States.dart';
 import 'package:gms_flutter/Modules/Home/Dashboard.dart';
 import 'package:gms_flutter/Modules/Home/Home.dart';
 import 'package:gms_flutter/Modules/Home/ShowQR.dart';
 import 'package:gms_flutter/Modules/drawer/About.dart';
 import 'package:gms_flutter/Modules/drawer/Faq.dart';
 import 'package:gms_flutter/Modules/drawer/KnowledgeHub/KnowledgeHubHome.dart';
-import 'package:gms_flutter/Modules/drawer/Settings.dart';
+import 'package:gms_flutter/Modules/Home/Settings.dart';
 import 'package:gms_flutter/Modules/drawer/SubscriptionsHistory.dart';
 import 'package:gms_flutter/Shared/Components.dart';
 import 'package:gms_flutter/Shared/Constant.dart';
@@ -38,56 +40,51 @@ class _BaseState extends State<Base> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: Constant.scaffoldColor,
-      drawer: buildDrawer(context),
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            _scaffoldKey.currentState?.openDrawer();
-          },
-          icon: Icon(Icons.menu, color: Colors.white),
-        ),
-        actions: [
-          IconButton(
+    return BlocBuilder<Manager, BLoCStates>(
+      builder: (context, state) => Scaffold(
+        key: _scaffoldKey,
+        drawer: buildDrawer(context),
+        appBar: AppBar(
+          leading: IconButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Notifications()),
-              );
+              _scaffoldKey.currentState?.openDrawer();
             },
-            icon: Icon(Icons.notifications, color: Colors.white),
+            icon: Icon(Icons.menu, color: Colors.white),
           ),
-        ],
-        backgroundColor: Colors.black,
-        centerTitle: true,
-        title: reusableText(
-          content: 'ShapeUp',
-          fontSize: 22.0,
-          fontColor: Colors.greenAccent,
-          fontWeight: FontWeight.bold,
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Notifications()),
+                );
+              },
+              icon: Icon(Icons.notifications, color: Colors.white),
+            ),
+          ],
+          centerTitle: true,
+          title: reusableText(
+            content: 'ShapeUp',
+            fontSize: 22.0,
+            fontColor: Colors.greenAccent,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Container(
-          height: Constant.screenHeight,
-          width: Constant.screenWidth,
-          padding: const EdgeInsets.all(10),
-          color: Constant.scaffoldColor,
-          child: Center(child: screens[bottomNavIndex]),
+        body: SafeArea(
+          child: Container(
+            height: Constant.screenHeight,
+            width: Constant.screenWidth,
+            padding: const EdgeInsets.all(10),
+            child: Center(child: screens[bottomNavIndex]),
+          ),
         ),
-      ),
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(canvasColor: Colors.black),
-        child: BottomNavigationBar(
+        bottomNavigationBar: BottomNavigationBar(
           currentIndex: bottomNavIndex,
           onTap: (int index) {
             setState(() {
               bottomNavIndex = index;
             });
           },
-          selectedItemColor: Colors.greenAccent,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.house_outlined),
@@ -113,7 +110,6 @@ class _BaseState extends State<Base> {
 
   Widget buildDrawer(BuildContext context) {
     return Drawer(
-      backgroundColor: Constant.scaffoldColor,
       child: SafeArea(
         child: Column(
           children: [

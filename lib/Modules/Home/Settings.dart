@@ -4,8 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gms_flutter/BLoC/Manager.dart';
 import 'package:gms_flutter/BLoC/States.dart';
+import 'package:gms_flutter/BLoC/ThemeManager.dart';
 import 'package:gms_flutter/Modules/ChangePassword.dart';
-import 'package:gms_flutter/Modules/Home/Profile.dart';
+import 'package:gms_flutter/Modules/Profile.dart';
 import 'package:gms_flutter/Shared/SharedPrefHelper.dart';
 
 class Settings extends StatefulWidget {
@@ -84,16 +85,23 @@ class _SettingsState extends State<Settings> {
                   icon: FontAwesomeIcons.moon,
                   title: "Dark Mode",
                   value: SharedPrefHelper.getBool('appTheme') ?? true,
-                  onChanged: (val) {
-                    manager.changeAppTheme();
+                  onChanged: (val) async {
+                    if (val) {
+                      context.read<ThemeManager>().setDark();
+                    } else {
+                      context.read<ThemeManager>().setLight();
+                    }
+                    await SharedPrefHelper.saveBool('appTheme', val);
+                    setState(() {});
                   },
                 ),
                 _buildToggleTile(
                   icon: FontAwesomeIcons.bell,
                   title: "Notifications",
-                  value: SharedPrefHelper.getBool('appNotifications') ?? false,
-                  onChanged: (val) {
-                    manager.changeAppNotification();
+                  value: SharedPrefHelper.getBool('appNotifications') ?? true,
+                  onChanged: (val) async {
+                    await SharedPrefHelper.saveBool('appNotifications', val);
+                    setState(() {});
                   },
                 ),
               ],
@@ -128,6 +136,8 @@ class _SettingsState extends State<Settings> {
               label: const Text("Logout", style: TextStyle(fontSize: 16)),
               onPressed: () {
                 manager.logout();
+                // reset main App Theme
+                context.read<ThemeManager>().setDark();
               },
             ),
             fallback: (context) =>

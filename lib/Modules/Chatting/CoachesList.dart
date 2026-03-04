@@ -37,7 +37,6 @@ class _CoachesListState extends State<CoachesList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Constant.scaffoldColor,
       appBar: AppBar(
         title: const Text(
           'ShapeUp Coaches',
@@ -53,9 +52,7 @@ class _CoachesListState extends State<CoachesList> {
             icon: const Icon(Icons.more_vert_outlined),
           ),
         ],
-        backgroundColor: Colors.black,
         elevation: 1,
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: BlocConsumer<ChatManager, BLoCStates>(
         listener: (_, _) {},

@@ -9,7 +9,7 @@ import 'package:gms_flutter/Shared/Constant.dart';
 import 'package:gms_flutter/Shared/SharedPrefHelper.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../BLoC/Manager.dart';
+import '../BLoC/Manager.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -64,16 +64,13 @@ class _ProfileState extends State<Profile> {
     return BlocConsumer<Manager, BLoCStates>(
       listener: (context, state) {},
       builder: (context, state) => Scaffold(
-        backgroundColor: Constant.scaffoldColor,
         appBar: AppBar(
-          iconTheme: IconThemeData(color: Colors.white),
           title: reusableText(
             content: 'Profile',
             fontSize: 22.0,
             fontColor: Colors.greenAccent,
             fontWeight: FontWeight.bold,
           ),
-          backgroundColor: Colors.black,
           centerTitle: true,
           elevation: 0,
         ),
@@ -286,7 +283,6 @@ class _ProfileState extends State<Profile> {
     showModalBottomSheet(
       context: context,
       useSafeArea: true,
-      backgroundColor: Constant.scaffoldColor,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

@@ -48,23 +48,20 @@ class _MyProgramsState extends State<MyPrograms> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
-            iconTheme: const IconThemeData(color: Colors.white),
             title: reusableText(
               content: 'My Programs',
               fontSize: 22,
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
             ),
-            backgroundColor: Colors.black,
             centerTitle: true,
             elevation: 0,
           ),
           body: ConditionalBuilder(
             condition: state is! LoadingState,
             builder: (context) {
-              if (state is SuccessState || state is UpdateNewState) {
+              if (state is SuccessState) {
                 return ListView.builder(
                   padding: const EdgeInsets.all(10),
                   itemCount: manager.userPrograms.length,

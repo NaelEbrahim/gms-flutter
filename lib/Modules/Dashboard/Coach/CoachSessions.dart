@@ -1,33 +1,33 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gms_flutter/BLoC/Manager.dart';
 import 'package:gms_flutter/BLoC/States.dart';
+import 'package:gms_flutter/Models/SessionsModel.dart';
+import 'package:gms_flutter/Modules/Info/SessionInfo.dart';
+import 'package:gms_flutter/Shared/Components.dart';
 import 'package:gms_flutter/Shared/Constant.dart';
 
-import '../../BLoC/Manager.dart';
-import '../../Shared/Components.dart';
-
-class FAQ extends StatefulWidget {
-  const FAQ({super.key});
+class CoachSessions extends StatefulWidget {
+  const CoachSessions({super.key});
 
   @override
-  State<FAQ> createState() => _FAQState();
+  State<CoachSessions> createState() => _CoachSessionsState();
 }
 
-class _FAQState extends State<FAQ> {
+class _CoachSessionsState extends State<CoachSessions> {
   late Manager manager;
 
   @override
   void initState() {
     super.initState();
     manager = Manager.get(context);
-    manager.getFAQs();
+    manager.getCoachSessions();
   }
 
   @override
   void dispose() {
-    manager.faqList.clear();
+    manager.coachSessions.clear();
     super.dispose();
   }
 
@@ -46,7 +46,7 @@ class _FAQState extends State<FAQ> {
         return Scaffold(
           appBar: AppBar(
             title: reusableText(
-              content: 'FAQ',
+              content: 'Coach Sessions',
               fontSize: 22.0,
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
@@ -58,33 +58,18 @@ class _FAQState extends State<FAQ> {
             condition: state is! LoadingState,
             builder: (context) {
               if (state is SuccessState) {
-                if (manager.faqList.isNotEmpty) {
-                  return ListView.builder(
-                    padding: const EdgeInsets.all(10),
-                    itemCount: manager.faqList.length,
-                    itemBuilder: (context, index) {
-                      final faq = manager.faqList[index];
-                      return _buildFAQCard(
-                        question: faq.question,
-                        answer: faq.answer,
-                        index: index,
-                      );
-                    },
-                  );
-                } else {
-                  return const Center(
-                    child: Text(
-                      "No FAQs yet.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
-                    ),
-                  );
-                }
+                return ListView.builder(
+                  padding: const EdgeInsets.all(10),
+                  itemCount: manager.coachSessions.length,
+                  itemBuilder: (context, index) {
+                    SessionsModel item = manager.coachSessions.elementAt(index);
+                    return _buildSessionCard(context, item, index);
+                  },
+                );
               } else {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       reusableText(
                         content: 'Connection error!',
@@ -93,9 +78,7 @@ class _FAQState extends State<FAQ> {
                       ),
                       const SizedBox(height: 10.0),
                       GestureDetector(
-                        onTap: () {
-                          manager.getFAQs();
-                        },
+                        onTap: () => manager.getCoachSessions(),
                         child: Container(
                           height: 50,
                           width: Constant.screenWidth / 3,
@@ -135,78 +118,89 @@ class _FAQState extends State<FAQ> {
               }
             },
             fallback: (context) =>
-                Center(child: const CircularProgressIndicator()),
+                const Center(child: CircularProgressIndicator()),
           ),
         );
       },
     );
   }
 
-  Widget _buildFAQCard({
-    required String question,
-    required String answer,
-    required int index,
-  }) {
+  Widget _buildSessionCard(
+    BuildContext context,
+    SessionsModel item,
+    int index,
+  ) {
     return TweenAnimationBuilder<double>(
-      duration: Duration(milliseconds: 500 + index * 120),
-      tween: Tween(begin: 0.9, end: 1),
+      key: ValueKey(item.id),
+      tween: Tween(begin: 0.85, end: 1),
+      duration: Duration(milliseconds: 500 + (index * 150)),
       curve: Curves.easeOutBack,
       builder: (context, scale, child) {
         return Transform.scale(scale: scale, child: child);
       },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: [Colors.teal.shade700, Colors.black87],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(102),
-              blurRadius: 8,
-              offset: const Offset(0, 5),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => SessionInfo(sessionsModel: item)),
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade700, Colors.black87],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-          ],
-        ),
-        child: Theme(
-          data: ThemeData.dark().copyWith(
-            dividerColor: Colors.transparent,
-            iconTheme: const IconThemeData(color: Colors.greenAccent),
-          ),
-          child: ExpansionTile(
-            tilePadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            childrenPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            leading: const Icon(
-              FontAwesomeIcons.circleQuestion,
-              color: Colors.greenAccent,
-            ),
-            title: Text(
-              question,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(102),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
-            ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  answer,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                    height: 1.4,
+              Center(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
                   ),
+                  child: item.classImage != null
+                      ? Image.network(
+                          Constant.mediaURL + item.classImage!,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.fill,
+                          errorBuilder: (_, __, ___) =>
+                              const Icon(Icons.broken_image, size: 100),
+                        )
+                      : const Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 100,
+                        ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title ?? '',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.greenAccent,
+                      ),
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.info_outlined, color: Colors.greenAccent),
+                  ],
                 ),
               ),
             ],

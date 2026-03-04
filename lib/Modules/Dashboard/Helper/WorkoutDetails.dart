@@ -45,11 +45,8 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
             ) !=
             -1;
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
-            backgroundColor: Colors.black,
             elevation: 0,
-            iconTheme: const IconThemeData(color: Colors.white),
             centerTitle: true,
             title: Text(
               widget.workout.title,

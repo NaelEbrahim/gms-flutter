@@ -44,16 +44,13 @@ class _MyPrivateCoachesState extends State<MyPrivateCoaches> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
-            iconTheme: IconThemeData(color: Colors.white),
             title: reusableText(
               content: 'My Private Coaches',
               fontSize: 22.0,
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
             ),
-            backgroundColor: Colors.black,
             centerTitle: true,
             elevation: 0,
           ),

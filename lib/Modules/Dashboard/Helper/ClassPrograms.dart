@@ -36,12 +36,9 @@ class _ClassProgramsState extends State<ClassPrograms> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Constant.scaffoldColor,
           appBar: AppBar(
-            backgroundColor: Colors.black,
             centerTitle: true,
             elevation: 0,
-            iconTheme: const IconThemeData(color: Colors.white),
             title: reusableText(
               content: 'Class Programs',
               fontColor: Colors.greenAccent,

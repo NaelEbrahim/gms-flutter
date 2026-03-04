@@ -50,7 +50,7 @@ class SessionsModel {
       description: json['description'] as String?,
       classId: json['classId'] as int?,
       coach: UserModel.fromJson(json['coach']),
-      rate: (json['rate'] as num?)?.toDouble(),
+      rate: (json['rate'] ?? 0)?.toDouble(),
       days: (json['schedules'] as List)
           .map((e) => SessionScheduleModel.fromJson(e))
           .toList(),
@@ -77,7 +77,7 @@ class SessionsModel {
       description: json['description'],
       classId: json['classId'],
       coach: UserModel.fromJson(json['coach']),
-      rate: (json['rate'] as num).toDouble(),
+      rate: (json['rate'] ?? 0).toDouble(),
       days: (json['schedules'] as List)
           .map((e) => SessionScheduleModel.fromJson(e))
           .toList(),

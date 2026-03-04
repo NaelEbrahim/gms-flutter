@@ -38,10 +38,6 @@ class Manager extends Cubit<BLoCStates> {
 
   static Manager get(BuildContext context) => BlocProvider.of(context);
 
-  void updateState() {
-    emit(UpdateNewState());
-  }
-
   final int paginationSize = 5;
 
   late Login_Model loginModel;
@@ -57,6 +53,7 @@ class Manager extends Cubit<BLoCStates> {
           );
           await TokenStorage.writeAccessToken(loginModel.accessToken);
           await TokenStorage.writeRefreshToken(loginModel.refreshToken);
+          await TokenStorage.writeRoles(loginModel.accessToken);
           MyApp.navigatorKey.currentState?.pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => Base()),
             (route) => false,
@@ -99,8 +96,6 @@ class Manager extends Cubit<BLoCStates> {
       }
     });
   }
-
-  String? message;
 
   void forgotPassword(Map<String, dynamic> data) {
     emit(LoadingState());
@@ -346,19 +341,6 @@ class Manager extends Cubit<BLoCStates> {
         });
   }
 
-  Future<void> changeAppTheme() async {
-    final darkMode = !(SharedPrefHelper.getBool('appTheme') ?? true);
-    await SharedPrefHelper.saveBool('appTheme', darkMode);
-    emit(UpdateNewState());
-  }
-
-  void changeAppNotification() async {
-    final appNotifications =
-        !(SharedPrefHelper.getBool('appNotifications') ?? true);
-    await SharedPrefHelper.saveBool('appNotifications', appNotifications);
-    emit(UpdateNewState());
-  }
-
   void changePassword(Map<String, dynamic> data) {
     emit(LoadingState());
     Dio_Linker.putData(url: CHANGEPASSWORD, data: data)
@@ -376,7 +358,6 @@ class Manager extends Cubit<BLoCStates> {
           }
         })
         .catchError((error) {
-          print(error);
           String errorMessage = handleDioError(error);
           emit(ErrorState(errorMessage));
         });
@@ -925,6 +906,74 @@ class Manager extends Cubit<BLoCStates> {
     Dio_Linker.deleteData(url: DELETEPROGRAMFEEDBACK, data: data)
         .then((value) {
           getUserPrograms();
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<ClassesModel> coachClasses = [];
+
+  Future<void> getCoachClasses() async {
+    emit(LoadingState());
+    return Dio_Linker.getData(
+          url: GETCOACHCLASSES + SharedPrefHelper.getString('id').toString(),
+        )
+        .then((value) {
+          coachClasses = ClassesModel.parseList(value.data['message']);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<SessionsModel> coachSessions = [];
+
+  Future<void> getCoachSessions() async {
+    emit(LoadingState());
+    return Dio_Linker.getData(
+          url: GETCOACHSESSIONS + SharedPrefHelper.getString('id').toString(),
+        )
+        .then((value) {
+          coachSessions = SessionsModel.parseList(value.data['message']);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<DietPlanModel> coachDiets = [];
+
+  Future<void> getCoachDiets() async {
+    emit(LoadingState());
+    return Dio_Linker.getData(
+          url: GETCOACHDIETS + SharedPrefHelper.getString('id').toString(),
+        )
+        .then((value) {
+          coachDiets = DietPlanModel.parseNestedList(value.data['message']);
+          emit(SuccessState());
+        })
+        .catchError((error) {
+          String errorMessage = handleDioError(error);
+          emit(ErrorState(errorMessage));
+        });
+  }
+
+  List<PrivateCoachModel> coachTrainees = [];
+
+  Future<void> getCoachTrainees() async {
+    emit(LoadingState());
+    return Dio_Linker.getData(
+          url: GETCOACHUSERS + SharedPrefHelper.getString('id').toString(),
+        )
+        .then((value) {
+          coachTrainees = PrivateCoachModel.parseList(value.data['message']);
+          emit(SuccessState());
         })
         .catchError((error) {
           String errorMessage = handleDioError(error);

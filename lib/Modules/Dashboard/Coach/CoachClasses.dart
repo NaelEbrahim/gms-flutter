@@ -1,47 +1,52 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gms_flutter/BLoC/Manager.dart';
 import 'package:gms_flutter/BLoC/States.dart';
-import 'package:gms_flutter/Models/WorkoutModel.dart';
-import 'package:gms_flutter/Modules/Dashboard/Helper/WorkoutDetails.dart';
+import 'package:gms_flutter/Models/ClassesModel.dart';
+import 'package:gms_flutter/Modules/Info/ClassInfo.dart';
+import 'package:gms_flutter/Shared/Components.dart';
 import 'package:gms_flutter/Shared/Constant.dart';
 
-import '../../BLoC/Manager.dart';
-import '../../Shared/Components.dart';
-
-
-class MyFavorites extends StatefulWidget {
-  const MyFavorites({super.key});
+class CoachClasses extends StatefulWidget {
+  const CoachClasses({super.key});
 
   @override
-  State<MyFavorites> createState() => _MyFavoritesState();
+  State<CoachClasses> createState() => _CoachClassesState();
 }
 
-class _MyFavoritesState extends State<MyFavorites> {
+class _CoachClassesState extends State<CoachClasses> {
   late Manager manager;
 
   @override
   void initState() {
     super.initState();
     manager = Manager.get(context);
-    manager.getUserFavorites();
+    manager.getCoachClasses();
   }
 
   @override
   void dispose() {
-    manager.userFavorites.clear();
+    manager.coachClasses.clear();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<Manager, BLoCStates>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is ErrorState) {
+          ReusableComponents.showToast(
+            state.error.toString(),
+            background: Colors.red,
+          );
+        }
+      },
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
             title: reusableText(
-              content: 'My Favorites',
+              content: 'Coach Classes',
               fontSize: 22.0,
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
@@ -53,29 +58,18 @@ class _MyFavoritesState extends State<MyFavorites> {
             condition: state is! LoadingState,
             builder: (context) {
               if (state is SuccessState) {
-                return manager.userFavorites.isEmpty
-                    ? const Center(
-                        child: Text(
-                          "No favorites yet.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white70, fontSize: 16),
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(10),
-                        itemCount: manager.userFavorites.length,
-                        itemBuilder: (context, index) {
-                          final workout = manager.userFavorites.elementAt(
-                            index,
-                          );
-                          return _buildFavoriteCard(workout, index, context);
-                        },
-                      );
+                return ListView.builder(
+                  padding: const EdgeInsets.all(10),
+                  itemCount: manager.coachClasses.length,
+                  itemBuilder: (context, index) {
+                    ClassesModel item = manager.coachClasses.elementAt(index);
+                    return _buildClassCard(context, item, index);
+                  },
+                );
               } else {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       reusableText(
                         content: 'Connection error!',
@@ -84,9 +78,7 @@ class _MyFavoritesState extends State<MyFavorites> {
                       ),
                       const SizedBox(height: 10.0),
                       GestureDetector(
-                        onTap: () {
-                          manager.getUserFavorites();
-                        },
+                        onTap: () => manager.getCoachClasses(),
                         child: Container(
                           height: 50,
                           width: Constant.screenWidth / 3,
@@ -126,100 +118,96 @@ class _MyFavoritesState extends State<MyFavorites> {
               }
             },
             fallback: (context) =>
-                Center(child: const CircularProgressIndicator()),
+                const Center(child: CircularProgressIndicator()),
           ),
         );
       },
     );
   }
 
-  Widget _buildFavoriteCard(
-    WorkoutModel workout,
-    int index,
-    BuildContext context,
-  ) {
+  Widget _buildClassCard(BuildContext context, ClassesModel item, int index) {
     return TweenAnimationBuilder<double>(
-      key: ValueKey(workout.id),
-      tween: Tween(begin: 0.9, end: 1),
-      duration: Duration(milliseconds: 500 + (index * 120)),
+      key: ValueKey(item.id),
+      tween: Tween(begin: 0.85, end: 1),
+      duration: Duration(milliseconds: 500 + (index * 150)),
       curve: Curves.easeOutBack,
       builder: (context, scale, child) {
         return Transform.scale(scale: scale, child: child);
       },
       child: GestureDetector(
-        onTap: (){
+        onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => WorkoutDetails(workout: workout),
+              builder: (_) => ClassInfo(
+                classId: item.id.toString(),
+                image: item.imagePath,
+                title: item.name.toString(),
+                description: item.description.toString(),
+                pricePerMonth: item.price.toString(),
+                coach: item.coach,
+              ),
             ),
           );
         },
         child: Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(14),
+          margin: const EdgeInsets.only(bottom: 20),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
-              colors: [Colors.teal.shade700, Constant.scaffoldColor],
+              colors: [Colors.teal.shade700, Colors.black87],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withAlpha(102),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  height: 60,
-                  width: 60,
-                  color: Colors.black26,
-                  child:
-                  (workout.imagePath != null)
+              Center(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
+                  child: item.imagePath != null
                       ? Image.network(
-                          Constant.mediaURL + workout.imagePath!,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Center(
-                                child: Icon(
-                                  Icons.fitness_center,
-                                  size: 60,
-                                  color: Colors.greenAccent,
-                                ),
-                              ),
+                          Constant.mediaURL + item.imagePath!,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.fill,
+                          errorBuilder: (_, _, _) =>
+                              const Icon(Icons.broken_image, size: 100),
                         )
-                      : Icon(
-                        Icons.fitness_center,
-                        size: 60,
+                      : const Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 100,
+                        ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name ?? '',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                         color: Colors.greenAccent,
                       ),
+                    ),
+                    const Spacer(),
+                    Icon(Icons.info_outlined, color: Colors.greenAccent),
+                    const SizedBox(height: 12),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  workout.title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_forever, color: Colors.redAccent),
-                onPressed: () {
-                  ReusableComponents.deleteDialog<Manager>(context, () async {
-                    manager.deleteFavoriteRecord(workout.id.toString());
-                  });
-                },
               ),
             ],
           ),

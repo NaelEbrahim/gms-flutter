@@ -27,14 +27,8 @@ class DietPlanModel {
     this.startedAt,
   });
 
-  static List<DietPlanModel> parseList(jsonList) {
-    List<DietPlanModel> diets = [];
-    if (jsonList != null && (jsonList as List).isNotEmpty) {
-      for (var element in jsonList) {
-        diets.add(DietPlanModel.fromJson(element));
-      }
-    }
-    return diets;
+  static List<DietPlanModel> parseList(List<dynamic> jsonList) {
+    return jsonList.map((e) => DietPlanModel.fromJson(e)).toList();
   }
 
   factory DietPlanModel.fromJson(Map<String, dynamic> json) {
@@ -54,6 +48,28 @@ class DietPlanModel {
       startedAt: json['startedAt'] as String?,
     );
   }
+
+  static List<DietPlanModel> parseNestedList(List<dynamic> jsonList) {
+    return jsonList.map((e) => DietPlanModel.fromNestedJson(e)).toList();
+  }
+
+  factory DietPlanModel.fromNestedJson(Map<String, dynamic> json) {
+    return DietPlanModel(
+      id: json['id'] as int?,
+      coach: UserModel.fromJson(json['coach']),
+      title: json['title'] as String?,
+      createdAt: json['createdAt'] as String?,
+      lastModifiedAt: json['lastModifiedAt'] as String?,
+      rate: null,
+      isActive: null,
+      schedule: json['schedule'] != null
+          ? ScheduleModel.fromJson(json['schedule'])
+          : null,
+      feedbacks: null,
+      myFeedback: null,
+      startedAt: null,
+    );
+  }
 }
 
 class ScheduleModel {
@@ -65,8 +81,12 @@ class ScheduleModel {
     final daysJson = json['days'] as Map<String, dynamic>?;
     Map<String, DayMealsModel>? parsedDays;
     if (daysJson != null) {
-      parsedDays = daysJson.map((key, value) =>
-          MapEntry(key, DayMealsModel.fromJson(value as Map<String, dynamic>)));
+      parsedDays = daysJson.map(
+        (key, value) => MapEntry(
+          key,
+          DayMealsModel.fromJson(value as Map<String, dynamic>),
+        ),
+      );
     }
     return ScheduleModel(days: parsedDays);
   }
@@ -78,12 +98,7 @@ class DayMealsModel {
   final List<MealModel>? dinner;
   final List<MealModel>? snack;
 
-  DayMealsModel({
-    this.breakfast,
-    this.lunch,
-    this.dinner,
-    this.snack,
-  });
+  DayMealsModel({this.breakfast, this.lunch, this.dinner, this.snack});
 
   factory DayMealsModel.fromJson(Map<String, dynamic> json) {
     return DayMealsModel(

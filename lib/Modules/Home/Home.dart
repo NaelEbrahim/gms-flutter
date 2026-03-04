@@ -405,8 +405,8 @@ class _HomeState extends State<Home> {
                         children: [
                           ClipOval(
                             child: (isClasses)
-                                ? buildCoachAvatar(cls!.imagePath)
-                                : buildCoachAvatar(session!.classImage),
+                                ? buildCoachAvatar(cls!.coach.profileImagePath)
+                                : buildCoachAvatar(session!.coach.profileImagePath),
                           ),
                           const SizedBox(width: 10),
                           reusableText(
