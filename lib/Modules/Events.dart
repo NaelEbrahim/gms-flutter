@@ -81,8 +81,6 @@ class _EventsScreenState extends State<Events> {
       },
       builder: (context, state) => Scaffold(
         appBar: AppBar(
-          foregroundColor: Colors.white,
-          backgroundColor: Colors.black,
           centerTitle: true,
           title: reusableText(
             content: 'Events',

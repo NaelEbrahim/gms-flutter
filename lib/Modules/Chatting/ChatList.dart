@@ -63,9 +63,7 @@ class _ChatListState extends State<ChatList> {
                 icon: Icon(Icons.more_vert_outlined),
               ),
             ],
-            backgroundColor: Colors.black,
             elevation: 1,
-            iconTheme: const IconThemeData(color: Colors.white),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {

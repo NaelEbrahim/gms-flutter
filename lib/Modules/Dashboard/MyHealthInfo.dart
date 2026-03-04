@@ -101,10 +101,8 @@ class _MyHealthInfoState extends State<MyHealthInfo> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            backgroundColor: Colors.black,
             centerTitle: true,
             elevation: 0,
-            iconTheme: const IconThemeData(color: Colors.white),
             title: reusableText(
               content: 'Health Metrics Dashboard',
               fontColor: Colors.greenAccent,

@@ -103,10 +103,8 @@ class _KnowledgeHubHomeState extends State<KnowledgeHubHome> {
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
             ),
-            backgroundColor: Colors.black,
             centerTitle: true,
             elevation: 1,
-            iconTheme: const IconThemeData(color: Colors.white),
           ),
           body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),

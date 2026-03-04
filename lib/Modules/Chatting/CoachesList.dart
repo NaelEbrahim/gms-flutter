@@ -52,9 +52,7 @@ class _CoachesListState extends State<CoachesList> {
             icon: const Icon(Icons.more_vert_outlined),
           ),
         ],
-        backgroundColor: Colors.black,
         elevation: 1,
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: BlocConsumer<ChatManager, BLoCStates>(
         listener: (_, _) {},

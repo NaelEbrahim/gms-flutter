@@ -49,14 +49,12 @@ class _MyProgramsState extends State<MyPrograms> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            iconTheme: const IconThemeData(color: Colors.white),
             title: reusableText(
               content: 'My Programs',
               fontSize: 22,
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
             ),
-            backgroundColor: Colors.black,
             centerTitle: true,
             elevation: 0,
           ),

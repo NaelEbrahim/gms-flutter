@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:gms_flutter/Shared/SharedPrefHelper.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class LocalNotificationService {
@@ -18,6 +19,9 @@ class LocalNotificationService {
     required String title,
     required String body,
   }) async {
+    final isAllowNotification =
+        SharedPrefHelper.getBool('appNotifications') ?? true;
+    if (!isAllowNotification) return;
     const androidDetails = AndroidNotificationDetails(
       'foreground_channel',
       'Foreground Notifications',

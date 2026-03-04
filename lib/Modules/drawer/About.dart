@@ -39,14 +39,12 @@ class _AboutState extends State<About> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            iconTheme: IconThemeData(color: Colors.white),
             title: reusableText(
               content: 'About us',
               fontSize: 22.0,
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
             ),
-            backgroundColor: Colors.black,
             centerTitle: true,
             elevation: 0,
           ),

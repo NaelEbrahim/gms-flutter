@@ -45,14 +45,12 @@ class _CoachDietsState extends State<CoachDiets> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            iconTheme: const IconThemeData(color: Colors.white),
             title: reusableText(
               content: 'Coach Diets',
               fontSize: 22.0,
               fontColor: Colors.greenAccent,
               fontWeight: FontWeight.bold,
             ),
-            backgroundColor: Colors.black,
             centerTitle: true,
             elevation: 0,
           ),

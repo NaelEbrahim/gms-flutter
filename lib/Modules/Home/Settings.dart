@@ -86,23 +86,22 @@ class _SettingsState extends State<Settings> {
                   title: "Dark Mode",
                   value: SharedPrefHelper.getBool('appTheme') ?? true,
                   onChanged: (val) async {
-                    var isDark = SharedPrefHelper.getBool('appTheme') ?? true;
-                    if (isDark) {
-                      context.read<ThemeManager>().setLight();
-                      await SharedPrefHelper.saveBool('appTheme', false);
-                    } else {
+                    if (val) {
                       context.read<ThemeManager>().setDark();
-                      await SharedPrefHelper.saveBool('appTheme', true);
+                    } else {
+                      context.read<ThemeManager>().setLight();
                     }
+                    await SharedPrefHelper.saveBool('appTheme', val);
                     setState(() {});
                   },
                 ),
                 _buildToggleTile(
                   icon: FontAwesomeIcons.bell,
                   title: "Notifications",
-                  value: SharedPrefHelper.getBool('appNotifications') ?? false,
-                  onChanged: (val) {
-                    manager.changeAppNotification();
+                  value: SharedPrefHelper.getBool('appNotifications') ?? true,
+                  onChanged: (val) async {
+                    await SharedPrefHelper.saveBool('appNotifications', val);
+                    setState(() {});
                   },
                 ),
               ],
@@ -137,6 +136,8 @@ class _SettingsState extends State<Settings> {
               label: const Text("Logout", style: TextStyle(fontSize: 16)),
               onPressed: () {
                 manager.logout();
+                // reset main App Theme
+                context.read<ThemeManager>().setDark();
               },
             ),
             fallback: (context) =>

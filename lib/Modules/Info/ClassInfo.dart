@@ -27,14 +27,12 @@ class ClassInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        foregroundColor: Colors.white,
         title: reusableText(
           content: 'Class Info',
           fontSize: 22.0,
           fontColor: Colors.greenAccent,
           fontWeight: FontWeight.bold,
         ),
-        backgroundColor: Colors.black,
         centerTitle: true,
         elevation: 0,
       ),

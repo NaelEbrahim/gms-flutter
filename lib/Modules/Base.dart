@@ -62,7 +62,6 @@ class _BaseState extends State<Base> {
               icon: Icon(Icons.notifications, color: Colors.white),
             ),
           ],
-          backgroundColor: Colors.black,
           centerTitle: true,
           title: reusableText(
             content: 'ShapeUp',
@@ -79,35 +78,31 @@ class _BaseState extends State<Base> {
             child: Center(child: screens[bottomNavIndex]),
           ),
         ),
-        bottomNavigationBar: Theme(
-          data: Theme.of(context).copyWith(canvasColor: Colors.black),
-          child: BottomNavigationBar(
-            currentIndex: bottomNavIndex,
-            onTap: (int index) {
-              setState(() {
-                bottomNavIndex = index;
-              });
-            },
-            selectedItemColor: Colors.greenAccent,
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.house_outlined),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.track_changes_outlined),
-                label: 'Dashboard',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.qr_code_2_outlined),
-                label: 'QR',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: 'Settings',
-              ),
-            ],
-          ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: bottomNavIndex,
+          onTap: (int index) {
+            setState(() {
+              bottomNavIndex = index;
+            });
+          },
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.house_outlined),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.track_changes_outlined),
+              label: 'Dashboard',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.qr_code_2_outlined),
+              label: 'QR',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings',
+            ),
+          ],
         ),
       ),
     );

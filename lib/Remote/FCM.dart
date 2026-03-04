@@ -31,7 +31,6 @@ class FirebaseMessagingService {
     final fcmToken = token ?? await _messaging.getToken();
     if (fcmToken == null) return;
     Manager manager = Manager();
-    print(fcmToken);
     manager.saveFCM({'fcmToken': fcmToken});
   }
 }

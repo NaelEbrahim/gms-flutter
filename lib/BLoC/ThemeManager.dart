@@ -23,21 +23,39 @@ class ThemeManager extends Cubit<ThemeData> {
   static final _darkTheme = ThemeData(
     brightness: Brightness.dark,
     scaffoldBackgroundColor: mainDarkColor,
+    canvasColor: Colors.black,
     progressIndicatorTheme: ProgressIndicatorThemeData(
       color: Colors.greenAccent,
     ),
     drawerTheme: DrawerThemeData(backgroundColor: mainDarkColor),
     bottomSheetTheme: BottomSheetThemeData(backgroundColor: mainDarkColor),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.black,
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Colors.greenAccent,
+      unselectedItemColor: Colors.white,
+    ),
   );
 
   static final _lightTheme = ThemeData(
     brightness: Brightness.light,
     scaffoldBackgroundColor: mainLightColor,
+    canvasColor: Colors.grey[800],
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: Colors.greenAccent,
     ),
     drawerTheme: DrawerThemeData(backgroundColor: mainLightColor),
     bottomSheetTheme: BottomSheetThemeData(backgroundColor: mainLightColor),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.grey[800],
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Colors.greenAccent,
+      unselectedItemColor: Colors.white,
+    ),
   );
 
   void setLight() => emit(_lightTheme);

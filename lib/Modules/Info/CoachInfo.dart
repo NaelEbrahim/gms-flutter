@@ -12,14 +12,12 @@ class UserInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
         title: reusableText(
           content: 'User Info',
           fontSize: 22,
           fontColor: Colors.greenAccent,
           fontWeight: FontWeight.bold,
         ),
-        backgroundColor: Colors.black,
         centerTitle: true,
         elevation: 0,
       ),

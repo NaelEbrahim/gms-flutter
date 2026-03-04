@@ -43,7 +43,6 @@ class _NotificationsState extends State<Notifications> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            iconTheme: IconThemeData(color: Colors.white),
             title: reusableText(
               content: 'Notifications',
               fontSize: 22.0,
@@ -51,7 +50,6 @@ class _NotificationsState extends State<Notifications> {
               fontWeight: FontWeight.bold,
             ),
             centerTitle: true,
-            backgroundColor: Colors.black,
           ),
           body: ConditionalBuilder(
             condition: state is! LoadingState,

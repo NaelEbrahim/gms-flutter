@@ -65,14 +65,12 @@ class _ProfileState extends State<Profile> {
       listener: (context, state) {},
       builder: (context, state) => Scaffold(
         appBar: AppBar(
-          iconTheme: IconThemeData(color: Colors.white),
           title: reusableText(
             content: 'Profile',
             fontSize: 22.0,
             fontColor: Colors.greenAccent,
             fontWeight: FontWeight.bold,
           ),
-          backgroundColor: Colors.black,
           centerTitle: true,
           elevation: 0,
         ),

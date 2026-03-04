@@ -46,8 +46,6 @@ class _MyEventsState extends State<MyEvents> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            iconTheme: const IconThemeData(color: Colors.white),
-            backgroundColor: Colors.black,
             centerTitle: true,
             title: const Text(
               "My Events",

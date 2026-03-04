@@ -341,13 +341,6 @@ class Manager extends Cubit<BLoCStates> {
         });
   }
 
-  void changeAppNotification() async {
-    final appNotifications =
-        !(SharedPrefHelper.getBool('appNotifications') ?? true);
-    await SharedPrefHelper.saveBool('appNotifications', appNotifications);
-    //emit(UpdateNewState());
-  }
-
   void changePassword(Map<String, dynamic> data) {
     emit(LoadingState());
     Dio_Linker.putData(url: CHANGEPASSWORD, data: data)
