@@ -28,6 +28,9 @@ class TokenStorage {
 
   static Future<String?> readRole() => _secureStorage.read(key: _roleKey);
 
+  static Future<void> deleteRoles() =>
+      _secureStorage.delete(key: _roleKey);
+
   static Future<void> writeRoles(String token) async {
     final roles = List<String>.from(JwtDecoder.decode(token)['roles'] ?? []);
     String? role;

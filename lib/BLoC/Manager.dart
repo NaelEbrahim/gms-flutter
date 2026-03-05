@@ -38,7 +38,7 @@ class Manager extends Cubit<BLoCStates> {
 
   static Manager get(BuildContext context) => BlocProvider.of(context);
 
-  final int paginationSize = 5;
+  final int paginationSize = 10;
 
   late Login_Model loginModel;
 
@@ -47,13 +47,17 @@ class Manager extends Cubit<BLoCStates> {
     Dio_Linker.postData(url: LOGIN, data: data)
         .then((value) async {
           loginModel = Login_Model.fromJson(value.data);
+          // handle FCM with Server
           FirebaseMessagingService.registerUserToken();
+          // Save User Data
           SharedPrefHelper.saveUserData(
             UserModel.fromJson(value.data['message']),
           );
           await TokenStorage.writeAccessToken(loginModel.accessToken);
           await TokenStorage.writeRefreshToken(loginModel.refreshToken);
           await TokenStorage.writeRoles(loginModel.accessToken);
+          // Navigate to home
+          await SharedPrefHelper.saveBool('is_logged_in', true);
           MyApp.navigatorKey.currentState?.pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => Base()),
             (route) => false,
@@ -80,6 +84,7 @@ class Manager extends Cubit<BLoCStates> {
 
   void performLogout() async {
     await SharedPrefHelper.clear();
+    await TokenStorage.deleteRoles();
     await TokenStorage.deleteAccessToken();
     await TokenStorage.deleteRefreshToken();
     Future.delayed(Duration(milliseconds: 50), () {
