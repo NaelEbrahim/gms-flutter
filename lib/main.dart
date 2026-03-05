@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gms_flutter/BLoC/ChatManager.dart';
 import 'package:gms_flutter/BLoC/ThemeManager.dart';
 import 'package:gms_flutter/Modules/Base.dart';
+import 'package:gms_flutter/Modules/Login.dart';
+import 'package:gms_flutter/Modules/OnBoarding.dart';
 import 'package:gms_flutter/Remote/Dio_Linker.dart';
 import 'package:gms_flutter/Remote/FCM.dart';
 import 'package:gms_flutter/Shared/Constant.dart';
@@ -32,6 +34,9 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   // Start listening to Firebase messages
   FirebaseMessagingService();
+  // Check suitable Route
+  final onboardingDone = SharedPrefHelper.getBool('onboarding_done') ?? false;
+  final isLoggedIn = SharedPrefHelper.getBool('is_logged_in') ?? false;
   runApp(
     MultiBlocProvider(
       providers: [
@@ -39,27 +44,42 @@ void main() async {
         BlocProvider(create: (context) => ThemeManager()),
         BlocProvider(create: (context) => ChatManager()),
       ],
-      child: const MyApp(),
+      child: MyApp(onboardingDone: onboardingDone, isLoggedIn: isLoggedIn),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool onboardingDone;
+  final bool isLoggedIn;
+
+  const MyApp({
+    super.key,
+    required this.onboardingDone,
+    required this.isLoggedIn,
+  });
 
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
+    Widget startScreen;
+    if (!onboardingDone) {
+      startScreen = const OnBoarding();
+    } else if (!isLoggedIn) {
+      startScreen = const Login();
+    } else {
+      startScreen = const Base();
+    }
     Constant.initializeScreenSize(context);
     return BlocBuilder<ThemeManager, ThemeData>(
       builder: (context, theme) {
         return MaterialApp(
-          navigatorKey: navigatorKey,
           theme: theme,
+          navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
-          home: Base(),
+          home: startScreen,
         );
       },
     );

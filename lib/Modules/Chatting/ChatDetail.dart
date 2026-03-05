@@ -221,6 +221,11 @@ class _ChatDetailState extends State<ChatDetail> {
             );
           },
         ),
+        if (state is SuccessState && chat.isEmpty)
+          Align(
+            alignment: AlignmentGeometry.center,
+            child: Image.asset('images/noMessages.png'),
+          ),
         if (state is LoadingState)
           const Positioned(
             top: 10,
@@ -332,6 +337,8 @@ class _ChatDetailState extends State<ChatDetail> {
                           child: TextField(
                             controller: _controller,
                             focusNode: _focusNode,
+                            cursorColor: Colors.teal,
+                            style: TextStyle(color: Colors.black),
                             textCapitalization: TextCapitalization.sentences,
                             decoration: const InputDecoration(
                               hintText: 'Message...',
