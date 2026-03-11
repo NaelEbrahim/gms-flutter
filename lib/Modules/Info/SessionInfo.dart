@@ -59,7 +59,7 @@ class SessionInfo extends StatelessWidget {
           children: [
             (sessionsModel.classImage != null)
                 ? Image.network(
-                    Constant.mediaURL + sessionsModel.classImage.toString(),
+                    sessionsModel.classImage.toString(),
                     height: 180,
                     width: double.infinity,
                     fit: BoxFit.fill,
@@ -114,8 +114,7 @@ class SessionInfo extends StatelessWidget {
             child: ClipOval(
               child: (sessionsModel.coach.profileImagePath != null)
                   ? Image.network(
-                      Constant.mediaURL +
-                          sessionsModel.coach.profileImagePath.toString(),
+                      sessionsModel.coach.profileImagePath.toString(),
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: double.infinity,

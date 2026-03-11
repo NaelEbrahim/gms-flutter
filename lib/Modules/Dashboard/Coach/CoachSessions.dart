@@ -172,7 +172,7 @@ class _CoachSessionsState extends State<CoachSessions> {
                   ),
                   child: item.classImage != null
                       ? Image.network(
-                          Constant.mediaURL + item.classImage!,
+                          item.classImage!,
                           height: 180,
                           width: double.infinity,
                           fit: BoxFit.fill,

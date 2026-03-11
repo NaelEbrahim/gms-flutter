@@ -177,7 +177,7 @@ class _CoachClassesState extends State<CoachClasses> {
                   ),
                   child: item.imagePath != null
                       ? Image.network(
-                          Constant.mediaURL + item.imagePath!,
+                          item.imagePath!,
                           height: 180,
                           width: double.infinity,
                           fit: BoxFit.fill,

@@ -184,7 +184,7 @@ class _MyFavoritesState extends State<MyFavorites> {
                   child:
                   (workout.imagePath != null)
                       ? Image.network(
-                          Constant.mediaURL + workout.imagePath!,
+                          workout.imagePath!,
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) =>
                               const Center(

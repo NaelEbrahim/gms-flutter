@@ -106,8 +106,7 @@ class _ChatListState extends State<ChatList> {
                               child: ClipOval(
                                 child: (chat.otherUserProfileImage != null)
                                     ? Image.network(
-                                        Constant.mediaURL +
-                                            chat.otherUserProfileImage
+                                       chat.otherUserProfileImage
                                                 .toString(),
                                         width: 60,
                                         height: 60,

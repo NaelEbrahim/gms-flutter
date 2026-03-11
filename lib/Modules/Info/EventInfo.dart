@@ -54,7 +54,7 @@ class _EventInfoState extends State<EventInfo> {
                       borderRadius: BorderRadius.circular(16),
                       child: widget.event.imagePath != null
                           ? Image.network(
-                              Constant.mediaURL + widget.event.imagePath!,
+                              widget.event.imagePath!,
                               fit: BoxFit.cover,
                               height: 200,
                               width: double.infinity,

@@ -172,7 +172,7 @@ class _CoachTraineesState extends State<CoachTrainees> {
                   radius: 30,
                   backgroundImage: item.coach.profileImagePath != null
                       ? NetworkImage(
-                          Constant.mediaURL + item.coach.profileImagePath!,
+                          item.coach.profileImagePath!,
                         )
                       : null,
                   child: item.coach.profileImagePath == null

@@ -86,10 +86,7 @@ class _ProfileState extends State<Profile> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(18),
                     gradient: LinearGradient(
-                      colors: [
-                        Colors.teal.shade700,
-                        Constant.scaffoldColor,
-                      ],
+                      colors: [Colors.teal.shade700, Constant.scaffoldColor],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -113,8 +110,7 @@ class _ProfileState extends State<Profile> {
                             child: ClipOval(
                               child: (profileImage != null)
                                   ? Image.network(
-                                      Constant.mediaURL +
-                                          profileImage.toString(),
+                                      profileImage.toString(),
                                       width: double.infinity,
                                       height: double.infinity,
                                       fit: BoxFit.cover,
@@ -198,10 +194,7 @@ class _ProfileState extends State<Profile> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
                       gradient: LinearGradient(
-                        colors: [
-                          Colors.teal.shade700,
-                          Constant.scaffoldColor,
-                        ],
+                        colors: [Colors.teal.shade700, Constant.scaffoldColor],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -377,7 +370,8 @@ class _ProfileState extends State<Profile> {
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
                       initialDate:
-                          DateTime.tryParse(dobController.text) ?? DateTime(2000),
+                          DateTime.tryParse(dobController.text) ??
+                          DateTime(2000),
                       firstDate: DateTime(1950),
                       lastDate: DateTime.now(),
                     );

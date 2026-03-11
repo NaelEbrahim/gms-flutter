@@ -79,7 +79,7 @@ class ClassInfo extends StatelessWidget {
           children: [
             if (image != null)
               Image.network(
-                Constant.mediaURL + image.toString(),
+                image.toString(),
                 height: 180,
                 width: double.infinity,
                 fit: BoxFit.fill,
@@ -126,7 +126,7 @@ class ClassInfo extends StatelessWidget {
             borderRadius: BorderRadius.circular(40),
             child: (coach.profileImagePath != null)
                 ? Image.network(
-                    Constant.mediaURL + coach.profileImagePath.toString(),
+                    coach.profileImagePath.toString(),
                     width: 60,
                     height: 60,
                     fit: BoxFit.cover,

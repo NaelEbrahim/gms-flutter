@@ -41,8 +41,8 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     scrollController.dispose();
-    manager.classes.items.clear();
-    manager.sessions.items.clear();
+    // manager.classes.items.clear();
+    // manager.sessions.items.clear();
     super.dispose();
   }
 
@@ -89,10 +89,17 @@ class _HomeState extends State<Home> {
           );
         }
       },
-      builder: (context, state) {
-        return ConditionalBuilder(
-          condition: state is! LoadingState,
-          builder: (context) => Column(
+      builder: (context, state) => ConditionalBuilder(
+        condition: state is! LoadingState,
+        builder: (context) {
+          if (state is ErrorState) {
+            return Center(
+              child: reusableText(
+                content: 'something went wrong, please check your connection',
+              ),
+            );
+          }
+          return Column(
             children: [
               SizedBox(
                 height: Constant.screenHeight * 0.25,
@@ -113,8 +120,7 @@ class _HomeState extends State<Home> {
                           fit: StackFit.expand,
                           children: [
                             Image.network(
-                              Constant.mediaURL +
-                                  manager.events.items[index].imagePath
+                              manager.events.items[index].imagePath
                                       .toString(),
                               width: Constant.screenWidth,
                               fit: BoxFit.fill,
@@ -308,11 +314,10 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ],
-          ),
-          fallback: (context) =>
-              Center(child: const CircularProgressIndicator()),
-        );
-      },
+          );
+        },
+        fallback: (context) => Center(child: const CircularProgressIndicator()),
+      ),
     );
   }
 
@@ -406,7 +411,9 @@ class _HomeState extends State<Home> {
                           ClipOval(
                             child: (isClasses)
                                 ? buildCoachAvatar(cls!.coach.profileImagePath)
-                                : buildCoachAvatar(session!.coach.profileImagePath),
+                                : buildCoachAvatar(
+                                    session!.coach.profileImagePath,
+                                  ),
                           ),
                           const SizedBox(width: 10),
                           reusableText(
@@ -442,7 +449,7 @@ class _HomeState extends State<Home> {
         height: 40,
         child: (imagePath != null && imagePath.isNotEmpty)
             ? Image.network(
-                Constant.mediaURL + imagePath,
+                imagePath,
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) => const Icon(
                   FontAwesomeIcons.circleUser,
@@ -464,7 +471,7 @@ class _HomeState extends State<Home> {
       borderRadius: const BorderRadius.horizontal(left: Radius.circular(18)),
       child: (imagePath != null)
           ? Image.network(
-              Constant.mediaURL + imagePath.toString(),
+              imagePath.toString(),
               width: 120,
               height: 140,
               fit: BoxFit.cover,

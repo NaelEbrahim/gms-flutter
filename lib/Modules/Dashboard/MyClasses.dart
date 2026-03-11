@@ -180,7 +180,7 @@ class _MyClassesState extends State<MyClasses> {
                     top: Radius.circular(20),
                   ),
                   child: (item.imagePath != null) ? Image.network(
-                    Constant.mediaURL + item.imagePath.toString(),
+                    item.imagePath.toString(),
                     height: 180,
                     width: double.infinity,
                     fit: BoxFit.fill,

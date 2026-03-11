@@ -170,8 +170,7 @@ class _MyPrivateCoachesState extends State<MyPrivateCoaches> {
                   child: ClipOval(
                     child: (coach.coach.profileImagePath != null)
                         ? Image.network(
-                            Constant.mediaURL +
-                                coach.coach.profileImagePath.toString(),
+                            coach.coach.profileImagePath.toString(),
                             width: double.infinity,
                             height: double.infinity,
                             fit: BoxFit.cover,
