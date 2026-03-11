@@ -171,7 +171,7 @@ class _MyEventsState extends State<MyEvents> {
                   width: 70,
                   child: event.imagePath != null
                       ? Image.network(
-                          Constant.mediaURL + event.imagePath!,
+                          event.imagePath!,
                           fit: BoxFit.cover,
                           errorBuilder: (_, _, _) => const Icon(
                             FontAwesomeIcons.medal,

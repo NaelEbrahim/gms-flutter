@@ -161,7 +161,7 @@ class _WorkoutDetailsState extends State<WorkoutDetails> {
         color: Colors.black26,
         child: hasImage
             ? Image.network(
-                Constant.mediaURL + widget.workout.imagePath!,
+                widget.workout.imagePath!,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) => const Center(
                   child: Icon(

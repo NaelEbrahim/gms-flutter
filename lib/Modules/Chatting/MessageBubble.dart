@@ -164,7 +164,7 @@ class MessageBubble extends StatelessWidget {
                       child: PhotoView(
                         imageProvider: content.startsWith('/data/')
                             ? FileImage(File(content))
-                            : NetworkImage(Constant.mediaURL + content)
+                            : NetworkImage(content)
                                   as ImageProvider,
                         backgroundDecoration: const BoxDecoration(
                           color: Colors.black,
@@ -201,7 +201,7 @@ class MessageBubble extends StatelessWidget {
     child: content.startsWith('/data/')
         ? Image.file(File(content), width: 200, height: 200, fit: BoxFit.cover)
         : Image.network(
-            Constant.mediaURL + content,
+            content,
             width: 200,
             height: 200,
             fit: BoxFit.cover,

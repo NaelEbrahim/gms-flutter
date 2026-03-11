@@ -152,8 +152,7 @@ class _ChatDetailState extends State<ChatDetail> {
             child: ClipOval(
               child: widget.chatInfo.otherUserProfileImage != null
                   ? Image.network(
-                      Constant.mediaURL +
-                          widget.chatInfo.otherUserProfileImage!,
+                      widget.chatInfo.otherUserProfileImage!,
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
@@ -512,7 +511,7 @@ class _ChatDetailState extends State<ChatDetail> {
             icon: const Icon(Icons.save_alt, color: Colors.white),
             onPressed: () async {
               await ReusableComponents.saveImageToGallery(
-                Constant.mediaURL + message.content,
+                message.content,
               );
             },
           ),

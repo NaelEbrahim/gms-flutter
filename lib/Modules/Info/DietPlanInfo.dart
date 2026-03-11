@@ -73,7 +73,7 @@ class DietPlanInfo extends StatelessWidget {
                 borderRadius: BorderRadius.circular(40),
                 child: (coach.profileImagePath != null)
                     ? Image.network(
-                        Constant.mediaURL + coach.profileImagePath.toString(),
+                        coach.profileImagePath.toString(),
                         width: 64,
                         height: 64,
                         fit: BoxFit.cover,
@@ -178,7 +178,7 @@ class DietPlanInfo extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             child: (meal['image'] != null)
                 ? Image.network(
-                    Constant.mediaURL + meal['image'],
+                    meal['image'],
                     width: 70,
                     height: 70,
                     fit: BoxFit.cover,

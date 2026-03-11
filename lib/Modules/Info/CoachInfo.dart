@@ -54,7 +54,7 @@ class UserInfo extends StatelessWidget {
                     radius: 60,
                     backgroundImage: user.profileImagePath != null
                         ? NetworkImage(
-                            Constant.mediaURL + user.profileImagePath!,
+                            user.profileImagePath!,
                           )
                         : null,
                     child: user.profileImagePath == null

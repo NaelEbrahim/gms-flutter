@@ -109,7 +109,7 @@ class _CoachesListState extends State<CoachesList> {
             backgroundColor: Colors.teal.withAlpha(38),
             child: ClipOval(
               child: Image.network(
-                Constant.mediaURL + coach.profileImagePath.toString(),
+                coach.profileImagePath.toString(),
                 width: 65,
                 height: 65,
                 fit: BoxFit.cover,

@@ -1,3 +1,4 @@
+import 'package:bodychart_heatmap/bodychart_heatmap.dart';
 import 'package:flutter/material.dart';
 
 import '../../../Models/WorkoutModel.dart';
@@ -225,6 +226,93 @@ class WorkoutList extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class MuscleHighlightIcon extends StatelessWidget {
+  final String muscleName;
+  final double size;
+  final Color highlightColor;
+  final Color defaultColor;
+
+  const MuscleHighlightIcon({
+    super.key,
+    required this.muscleName,
+    this.size = 60.0,
+    this.highlightColor = const Color(0xFF64FFDA),
+    this.defaultColor = Colors.black45,
+  });
+
+  // --- 1. Muscle mapping ---
+  static const Map<String, String> _muscleToBodyPart = {
+    // Core
+    "abs": "abs",
+    "core": "abs",
+    "obliques": "abs",
+
+    // Chest
+    "chest": "chest",
+    "pecs": "chest",
+
+    // Back
+    "back": "back",
+    "lats": "back",
+    "traps": "back",
+    "erector spinae": "back",
+
+    // Arms
+    "biceps": "arm",
+    "triceps": "arm",
+    "forearms": "arm",
+
+    // Shoulders
+    "delts": "shoulder",
+    "shoulders": "shoulder",
+
+    // Legs / Lower body
+    "legs": "leg",
+    "quads": "leg",
+    "hamstrings": "leg",
+    "calves": "leg",
+    "calve": "leg",
+    "glutes": "buttocks",
+  };
+
+  // --- 2. Normalize muscle name ---
+  String _normalizeMuscleName(String input) {
+    final cleaned = input.trim().toLowerCase();
+    if (_muscleToBodyPart.containsKey(cleaned))
+      return _muscleToBodyPart[cleaned]!;
+
+    // Partial match
+    for (final word in cleaned.split(' ')) {
+      if (_muscleToBodyPart.containsKey(word)) return _muscleToBodyPart[word]!;
+    }
+
+    // Default fallback
+    return "full body";
+  }
+
+  // --- 3. Decide front/back view ---
+  bool _isBackView(String bodyPart) {
+    return ["back", "buttocks"].contains(bodyPart);
+  }
+
+  // --- 4. Build ---
+  @override
+  Widget build(BuildContext context) {
+    final bodyPart = _normalizeMuscleName(muscleName);
+    final viewType = _isBackView(bodyPart)
+        ? BodyViewType.back
+        : BodyViewType.front;
+
+    return BodyChart(
+      selectedParts: {bodyPart},
+      selectedColor: highlightColor,
+      unselectedColor: defaultColor,
+      viewType: viewType,
+      width: size,
     );
   }
 }

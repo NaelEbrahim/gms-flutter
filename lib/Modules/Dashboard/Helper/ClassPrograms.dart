@@ -4,7 +4,6 @@ import 'package:gms_flutter/Models/ProgramModel.dart';
 import 'package:gms_flutter/Modules/Dashboard/Helper/ProgramDays.dart';
 import '../../../../BLoC/Manager.dart';
 import '../../../../BLoC/States.dart';
-import '../../../../Shared/Constant.dart';
 import '../../../../Shared/Components.dart';
 
 class ClassPrograms extends StatefulWidget {

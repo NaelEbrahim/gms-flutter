@@ -162,7 +162,7 @@ class _EventsScreenState extends State<Events> {
                 ),
                 child: (event.imagePath != null)
                     ? Image.network(
-                        Constant.mediaURL + event.imagePath.toString(),
+                        event.imagePath.toString(),
                         width: 100,
                         height: 100,
                         fit: BoxFit.cover,
