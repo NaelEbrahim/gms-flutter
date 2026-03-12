@@ -44,13 +44,25 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _startInitialization() async {
-    // Simulate steps with progress
-    final totalSteps = 5;
-    for (int i = 0; i < totalSteps; i++) {
-      await Future.delayed(const Duration(milliseconds: 400));
-      setState(() => _progress = (i + 1) / totalSteps);
+    final steps = [
+      () => Dio_Linker.init(),
+      () => SharedPrefHelper.init(),
+      () => Pusher_Linker.init(),
+      () => LocalNotificationService.init(),
+      () => Firebase.initializeApp(),
+      () async {
+        FirebaseMessaging.onBackgroundMessage(
+          firebaseMessagingBackgroundHandler,
+        );
+        FirebaseMessagingService();
+      },
+    ];
+
+    for (int i = 0; i < steps.length; i++) {
+      await steps[i]();
+      setState(() => _progress = (i + 1) / steps.length);
     }
-    // Run real initialization
+
     await widget.onInitializationComplete();
   }
 
@@ -112,22 +124,10 @@ class _SplashScreenState extends State<SplashScreen>
 class Launcher extends StatelessWidget {
   const Launcher({super.key});
 
-  Future<void> _initializeApp() async {
-    Dio_Linker.init();
-    await SharedPrefHelper.init();
-    await Pusher_Linker.init();
-    await LocalNotificationService.init();
-    await Firebase.initializeApp();
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-    FirebaseMessagingService();
-  }
-
   @override
   Widget build(BuildContext context) {
     return SplashScreen(
       onInitializationComplete: () async {
-        await _initializeApp();
-
         // Determine start screen
         final onboardingDone =
             SharedPrefHelper.getBool('onboarding_done') ?? false;
@@ -138,7 +138,7 @@ class Launcher extends StatelessWidget {
             ? const Login()
             : const Base();
 
-        // Navigate to main screen
+        // Navigate
         Navigator.of(
           context,
         ).pushReplacement(MaterialPageRoute(builder: (_) => startScreen));

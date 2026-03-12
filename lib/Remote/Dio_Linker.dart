@@ -6,7 +6,7 @@ class Dio_Linker {
   static late Dio dio;
   static const Duration globalTimeout = Duration(seconds: 15);
 
-  static void init() {
+  static Future init() async {
     dio = Dio(
       BaseOptions(
         baseUrl: Constant.baseAppURL,
